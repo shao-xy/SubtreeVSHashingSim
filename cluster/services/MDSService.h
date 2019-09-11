@@ -7,8 +7,9 @@ class MDSService : public Service {
 public:
 	MDSService(Host * host = NULL) : Service(host) {}
 
-	bool start() override;
-	bool stop() override;
+	bool entry() override;
+
+	bool handle_message(Message * m) override;
 };
 
 #endif /* cluster/services/MDSService.h */

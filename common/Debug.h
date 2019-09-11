@@ -5,7 +5,9 @@
 
 #include "Clock.h"
 
-#define dout std::cout << clock_now() << ' '
+#define dout_prefix ""
+
+#define dout std::cout << clock_now() << ' ' << dout_prefix
 #define dendl std::endl;
 
 #endif /* common/Debug.h */

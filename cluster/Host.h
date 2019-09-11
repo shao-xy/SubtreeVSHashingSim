@@ -4,17 +4,31 @@
 #include "include/types.h"
 
 #include "Service.h"
+#include "network/Network.h"
+
+class Message;
 
 class Host {
 private:
 	string _name;
-	vector<Service *> services;
+	Network network;
+	vector<Process *> process_list;
 public:
-	Host() : _name("SimHost") {}
-	Host(string name) : _name(name) {}
+	Host() : _name("SimHost"), network(this) {}
+	Host(string name) : _name(name), network(this) {}
 	~Host();
 
-	Service * create_service(string type);
+	bool attach(Process * proc);
+
+	Port register_service(Service * s);
+	bool unregister_service(Port port);
+
+	Port find_or_register_rev(Process * proc);
+	bool unregister_procrev(Port p);
+
+	bool send_message(Process * proc, NetworkEntity * target, Message * m);
+	bool recv_message(Message * m);
+	
 	string & name() { return _name; }
 };
 

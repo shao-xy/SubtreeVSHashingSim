@@ -1,15 +1,14 @@
 #include "MDSService.h"
 
 #include "cluster/Host.h"
-#include "common/Debug.h"
 
-bool MDSService::start()
+bool MDSService::entry()
 {
-	dout << "MDSService::start on host " << host->name() << dendl;
 	return true;
 }
 
-bool MDSService::stop()
+bool MDSService::handle_message(Message * m)
 {
+	if (!m)	return false;
 	return true;
 }
