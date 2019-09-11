@@ -7,15 +7,17 @@
 #include "network/Network.h"
 
 class Message;
+class Cluster;
 
 class Host {
 private:
+	Cluster * cluster;
 	string _name;
 	Network network;
 	vector<Process *> process_list;
 public:
-	Host() : _name("SimHost"), network(this) {}
-	Host(string name) : _name(name), network(this) {}
+	Host(Cluster * cluster = NULL) : cluster(cluster), _name("SimHost"), network(this) {}
+	Host(Cluster * cluster, string name) : cluster(cluster), _name(name), network(this) {}
 	~Host();
 
 	bool attach(Process * proc);
@@ -28,8 +30,10 @@ public:
 
 	bool send_message(Process * proc, NetworkEntity * target, Message * m);
 	bool recv_message(Message * m);
-	
+
 	string & name() { return _name; }
+	
+	Cluster * get_cluster() { return cluster; }
 };
 
 #endif /* cluster/Host.h */

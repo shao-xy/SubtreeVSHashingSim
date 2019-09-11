@@ -22,6 +22,7 @@ public:
 	static Service * create(Host * h, string type);
 	virtual ~Service() {}
 
+	Type get_type() { return type; }
 	Port get_port() { return port; }
 
 	bool start() override;

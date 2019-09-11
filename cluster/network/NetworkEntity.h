@@ -15,6 +15,10 @@ public:
 
 	NetworkEntity() : host(NULL), port(-1) {}
 	NetworkEntity(Host * host, Port port) : host(host), port(port) {}
+
+	NetworkEntity & operator=(NetworkEntity * another);
+	NetworkEntity & operator=(NetworkEntity & another);
+	bool operator==(NetworkEntity & another);
 };
 
 ostream & operator<<(ostream & os, NetworkEntity & entity);

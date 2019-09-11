@@ -8,8 +8,8 @@
 // Monitor
 #define MSG_FINDMDS 100
 #define MSG_FINDMDSACK 101
-#define MSG_REGMDS 102
-#define MSG_REGMDSACK 103
+#define MSG_MDSREG 102
+#define MSG_MDSREGACK 103
 
 class Message {
 private:

@@ -2,6 +2,29 @@
 
 #include "cluster/Host.h"
 
+NetworkEntity & NetworkEntity::operator=(NetworkEntity * another)
+{
+	if (another)
+		return (*this) = (*another);
+	else {
+		this->host = NULL;
+		this->port = -1;
+		return *this;
+	}
+}
+
+NetworkEntity & NetworkEntity::operator=(NetworkEntity & another)
+{
+	host = another.host;
+	port = another.port;
+	return *this;
+}
+
+bool NetworkEntity::operator==(NetworkEntity & another)
+{
+	return host == another.host && port == another.port;
+}
+
 ostream & operator<<(ostream & os, NetworkEntity & entity)
 {
 	if (!entity.host)

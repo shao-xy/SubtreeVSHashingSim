@@ -1,4 +1,5 @@
 #include "Host.h"
+#include "Cluster.h"
 
 #include "common/Debug.h"
 
@@ -27,7 +28,11 @@ bool Host::attach(Process * proc)
 
 Port Host::register_service(Service * s)
 {
-	return network.register_service(s);
+	Port p = network.register_service(s);
+	if (cluster && s->get_type() == Service::SERVICE_MON) {
+		cluster->register_monitor(new NetworkEntity(this, p));
+	}
+	return p;
 }
 
 bool Host::unregister_service(Port port)
@@ -49,7 +54,7 @@ bool Host::send_message(Process * proc, NetworkEntity * target, Message * m)
 {
 	if (!target || !target->host || target->host < 0)	return false;
 
-	dout << __func__ << " Host " << name() << " send message type " << m->get_type() << " to host " << target->host->name() << dendl;
+	dout << __func__ << " Host " << name() << " send message type " << m->get_type() << " to " << (*target) << dendl;
 
 	Port revport = find_or_register_rev(proc);
 
