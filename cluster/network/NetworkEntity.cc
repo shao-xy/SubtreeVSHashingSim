@@ -2,6 +2,11 @@
 
 #include "cluster/Host.h"
 
+bool NetworkEntity::is_valid()
+{
+	return host && port > 0;
+}
+
 NetworkEntity & NetworkEntity::operator=(NetworkEntity * another)
 {
 	if (another)

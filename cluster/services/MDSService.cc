@@ -6,6 +6,11 @@
 #include "cluster/Cluster.h"
 
 #include "cluster/messages/MMDSReg.h"
+#include "cluster/messages/MMDSRegAck.h"
+#include "cluster/messages/MClientRequest.h"
+#include "cluster/messages/MClientRequestReply.h"
+
+#include "fs/CachedObject.h"
 
 #undef dout_prefix
 #define dout_prefix get_host()->name() << "::MDSService(" << get_port() << ") "
@@ -30,5 +35,37 @@ bool MDSService::entry()
 bool MDSService::handle_message(Message * m)
 {
 	if (!m)	return false;
+	
+	int type = m->get_type();
+	bool ret = false;
+
+	switch (type) {
+		// monitor
+		case MSG_MDSREGACK:
+			ret = handle_mdsregack(m);
+			break;
+		// client
+		case MSG_CLIENTREQ:
+			ret = handle_clientrequest(m);
+		default:
+			break;
+	}
+
+	delete m;
+	return ret;
+}
+
+bool MDSService::handle_mdsregack(Message * m)
+{
+	MMDSRegAck * msg = static_cast<MMDSRegAck *>(m);
+	whoami = msg->rank;
+	dout << __func__ << " Set my rank to " << whoami << dendl;
 	return true;
+}
+
+bool MDSService::handle_clientrequest(Message * m)
+{
+	MClientRequest * msg = static_cast<MClientRequest *>(m);
+	//return send_message(&msg->src, new MClientRequestReply(msg->path, new CInode));
+	return send_message(&msg->src, new MClientRequestReply(msg->path, NULL));
 }

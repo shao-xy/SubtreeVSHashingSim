@@ -16,6 +16,8 @@ public:
 	NetworkEntity() : host(NULL), port(-1) {}
 	NetworkEntity(Host * host, Port port) : host(host), port(port) {}
 
+	bool is_valid();
+
 	NetworkEntity & operator=(NetworkEntity * another);
 	NetworkEntity & operator=(NetworkEntity & another);
 	bool operator==(NetworkEntity & another);

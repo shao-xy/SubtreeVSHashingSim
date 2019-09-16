@@ -11,6 +11,10 @@
 #define MSG_MDSREG 102
 #define MSG_MDSREGACK 103
 
+// MDS
+#define MSG_CLIENTREQ 200
+#define MSG_CLIENTREQREPLY 201
+
 class Message {
 private:
 	int type;

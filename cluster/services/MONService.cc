@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "MONService.h"
 
 #include "common/Debug.h"
@@ -17,20 +19,34 @@ bool MONService::entry()
 	return get_host()->get_cluster()->register_monitor(new NetworkEntity(get_host(), get_port()));
 }
 
-void MONService::add_mds(NetworkEntity * new_mds)
+MDSRank MONService::add_mds(NetworkEntity * new_mds)
 {
-	for (NetworkEntity * mds : mdses) {
-		if ((*mds) == (*new_mds))	return;
-	}
+	if (!new_mds)	return -1;
 
-	mdses.push_back(new_mds);
+	MDSRank max_rank = mds_active_list.size();
+	MDSRank rank = 0;
+	//map<MDSRank, NetworkEntity *>::iterator it_m = std::find_if(mds_active_list.begin(), mds_active_list.end(), [=] (const map<MDSRank, NetworkEntity *>::value_type item) { return *(item.second) == (*new_mds); });
+	//if (it_m == mds_active_list.end())
+	//	mds_active_list.insert(std::make_pair(mds_active_list.size(), new_mds));
+	for (; rank < max_rank; rank++) {
+		if (!mds_active_list.count(rank))	break;
+	}
+	mds_active_list.insert(std::make_pair(rank, new_mds));
+
+	vector<NetworkEntity *>::iterator it_sbm = std::find_if(mds_standby_list.begin(), mds_standby_list.end(), [=] (NetworkEntity * entity) { return (*entity) == (*new_mds); });
+	if (it_sbm != mds_standby_list.end())
+		mds_standby_list.erase(it_sbm);
+
+	return rank;
 }
 
 NetworkEntity * MONService::get_root_mds()
 {
-	if (mdses.size() == 0)	return NULL;
+	if (mds_active_list.count(0) != 0)
+		return mds_active_list[0];
 
-	return mdses[0];
+	// no root mds, find one
+	return mds_active_list.size() == 0 ? NULL : mds_active_list.begin()->second;
 }
 
 bool MONService::handle_message(Message * m)
@@ -68,7 +84,9 @@ bool MONService::handle_mdsregister(Message * m)
 	MMDSReg * msg = static_cast<MMDSReg *>(m);
 	dout << __func__ << " Get register MDS at port " << msg->port << " from " << m->src << dendl;
 
-	add_mds(new NetworkEntity(m->src.host, msg->port));
+	MDSRank rank = add_mds(new NetworkEntity(m->src.host, msg->port));
+	if (rank < 0)	return false;
 
-	return true;
+	MMDSRegAck * mack = new MMDSRegAck(rank);
+	return send_message(&m->src, mack);
 }

@@ -3,9 +3,12 @@
 
 #include "cluster/network/Message.h"
 
+#include "cluster/services/MDSService.h"
+
 class MMDSRegAck : public Message {
 public:
-	MMDSRegAck() : Message(MSG_MDSREGACK) {}
+	MDSRank rank;
+	MMDSRegAck(MDSRank rank = -1) : Message(MSG_MDSREGACK), rank(rank) {}
 	~MMDSRegAck() override {}
 };
 

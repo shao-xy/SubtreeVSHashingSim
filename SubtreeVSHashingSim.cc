@@ -22,6 +22,8 @@ bool TestClientProcess::entry()
 
 	//int ret = visit_file("/a/b");
 	connect_cluster();
+
+	visit_file("/a/b/c");
 	
 	dout << "Client Process end." << dendl;
 	return true;
