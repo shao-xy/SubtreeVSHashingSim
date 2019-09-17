@@ -6,7 +6,6 @@
 class FileSystem {
 public:
 	class Inode {
-	public:
 		string name;
 		bool isDir;
 
@@ -15,7 +14,10 @@ public:
 
 		string content;
 
+	public:
 		Inode(string name, bool isDir) : name(name), isDir(isDir) {}
+
+		bool is_dir() { return isDir; }
 
 		string get_name() { return name; }
 		void set_name(string newname) { name = newname; }
@@ -53,6 +55,12 @@ public:
 
 	bool mkdir(string path);
 	bool rmdir(string path);
+	bool lsdir(string path, vector<string> & ret);
+	bool lsdir(string path, vector<Inode *> & ret);
+
+	bool exist(string path);
+	bool is_file(string path);
+	bool is_dir(string path);
 };
 
 extern FileSystem gfs;

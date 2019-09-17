@@ -42,9 +42,8 @@ void FileSystem::Inode::delete_myself_recur()
 {
 	if (!isDir) return;
 
-	for (vector<Inode *>::iterator it = entries.begin(); it != entries.end();) {
+	for (vector<Inode *>::iterator it = entries.begin(); it != entries.end(); it = entries.erase(it)) {
 		(*it)->delete_myself_recur();
-		it = entries.erase(it);
 	}
 }
 
@@ -53,7 +52,7 @@ FileSystem::Inode * FileSystem::lookup(string path, Inode * start)
 	if (path == "")	return NULL;
 	if (!start)	start = root;
 
-	vector<string> path_list = ::split(path, "/");
+	vector<string> path_list = ::split_path(path, "/");
 	Inode * inode = start;
 	vector<Inode *>::iterator it;
 	for (string subpath : path_list) {
@@ -104,6 +103,7 @@ bool FileSystem::write(string path, string & in)
 
 bool FileSystem::mkdir(string path)
 {
+	if (path.back() == '/')	path = path.substr(0, path.size() -1);
 	string parent_path = dirname(path);
 	string name = basename(path);
 	Inode * parent = lookup(parent_path);
@@ -121,3 +121,44 @@ bool FileSystem::rmdir(string path)
 	return true;
 }
 
+bool FileSystem::lsdir(string path, vector<string> & ret)
+{
+	Inode * inode = lookup(path);
+	if (!inode || !inode->is_dir())	return false;
+
+	ret.clear();
+	for (auto it = inode->begin(); it != inode->end(); it++) {
+		ret.push_back((*it)->get_name());
+	}
+	return true;
+}
+
+bool FileSystem::lsdir(string path, vector<FileSystem::Inode *> & ret)
+{
+	Inode * inode = lookup(path);
+	if (!inode || !inode->is_dir())	return false;
+
+	ret.clear();
+	for (auto it = inode->begin(); it != inode->end(); it++) {
+		ret.push_back((*it));
+	}
+	return true;
+}
+
+bool FileSystem::exist(string path)
+{
+	Inode * inode = lookup(path);
+	return inode != NULL;
+}
+
+bool FileSystem::is_file(string path)
+{
+	Inode * inode = lookup(path);
+	return inode && !inode->is_dir();
+}
+
+bool FileSystem::is_dir(string path)
+{
+	Inode * inode = lookup(path);
+	return inode && inode->is_dir();
+}

@@ -26,18 +26,46 @@ vector<string> split(const string & str, const string & delim)
  
 	char *p = strtok(strs, d);  
 	while(p) {  
-		string s = p; //分割得到的字符串转换为string类型  
-		res.push_back(s); //存入结果数组  
+		string s = p;
+		res.push_back(s);
 		p = strtok(NULL, d);  
 	}  
  
 	return res;  
 } 
 
+vector<string> split_path(const string & str, const string & delim)
+{
+	vector<string> res;  
+	if("" == str) return res;  
+
+	char * strs = new char[str.length() + 1];
+	strcpy(strs, str.c_str());   
+ 
+	char * d = new char[delim.length() + 1];  
+	strcpy(d, delim.c_str());  
+ 
+	char *p = strtok(strs, d);  
+	while(p) {  
+		string s = p;
+		if (s == "..") {
+			if (!res.empty()) res.pop_back();
+		}
+		else if (s != "" && s != ".")
+			res.push_back(s);
+		p = strtok(NULL, d);  
+	}  
+ 
+	return res;  
+}
+
 string dirname(string path)
 {
 	size_t last_slash_pos = path.rfind('/');
-	return last_slash_pos == string::npos ? "/" : path.substr(0, last_slash_pos);
+	if (last_slash_pos == string::npos)	return "";
+	
+	string dirpath = path.substr(0, last_slash_pos);
+	return dirpath == "" ? "/" : dirpath;
 }
 
 string basename(string path)
