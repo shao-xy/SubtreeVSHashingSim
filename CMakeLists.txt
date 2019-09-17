@@ -21,6 +21,7 @@ include_directories(${PROJECT_SOURCE_DIR})
 
 add_subdirectory(common)
 add_subdirectory(cluster)
+add_subdirectory(fs)
 
 add_executable(SubtreeVSHashingSim
 	SubtreeVSHashingSim.cc

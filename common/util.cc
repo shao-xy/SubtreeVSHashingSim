@@ -33,3 +33,15 @@ vector<string> split(const string & str, const string & delim)
  
 	return res;  
 } 
+
+string dirname(string path)
+{
+	size_t last_slash_pos = path.rfind('/');
+	return last_slash_pos == string::npos ? "/" : path.substr(0, last_slash_pos);
+}
+
+string basename(string path)
+{
+	size_t last_slash_pos = path.rfind('/');
+	return last_slash_pos == string::npos ? path : path.substr(last_slash_pos + 1);
+}

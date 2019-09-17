@@ -6,4 +6,7 @@
 vector<unsigned int> findAll(const string & str, const string & delim);
 vector<string> split(const string & str, const string & delim);
 
+string dirname(string path);
+string basename(string path);
+
 #endif

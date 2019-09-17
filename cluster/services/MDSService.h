@@ -8,6 +8,8 @@ typedef int MDSRank;
 class MDSService : public Service {
 private:
 	MDSRank whoami;
+	//unordered_map<string, bool> cache;
+	//unordered_map<string, CInode *> cache;
 public:
 	MDSService(Host * host = NULL) : Service(host) {}
 
