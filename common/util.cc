@@ -59,6 +59,11 @@ vector<string> split_path(const string & str, const string & delim)
 	return res;  
 }
 
+bool filename_valid(string path)
+{
+	return path.find('/') == string::npos;
+}
+
 string dirname(string path)
 {
 	size_t last_slash_pos = path.rfind('/');

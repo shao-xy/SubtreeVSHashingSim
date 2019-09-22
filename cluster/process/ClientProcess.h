@@ -1,14 +1,14 @@
 #ifndef __CLUSTER_PROCESS_CLIENTPROCESS_H__
 #define __CLUSTER_PROCESS_CLIENTPROCESS_H__
 
-#include <string>
-using std::string;
+#include "include/types.h"
+#include "include/LRU.h"
 
 #include "cluster/Process.h"
 
-#include "cluster/network/NetworkEntity.h"
+#include "cluster/messages/MClientRequest.h"
 
-#include "include/LRU.h"
+#include "cluster/network/NetworkEntity.h"
 
 #define CLIENT_LRU_SIZE 1000
 
@@ -19,6 +19,9 @@ private:
 	NetworkEntity mon;
 	NetworkEntity root_mds;
 	bool connected;
+
+	CInode * callback_inoptr;
+	vector<CInode *> callback_inolist;
 
 	LRUCache<string, CInode *> cache;
 public:
@@ -33,11 +36,31 @@ private:
 public:
 	bool connect_cluster();
 private:
-	bool local_visit(string path);
-	bool remote_visit(string path);
-	bool visit(string path);
+	bool send_request(msg_op_fs_t op, CInode * ino, string data = "");
+	bool send_request(msg_op_fs_t op, string path = "", CInode * ino = NULL, string data = "");
+private:
+	CInode * _lookup(string path);
+	CInode * lookup(string path);
+	CInode * local_lookup(string path);
+	bool remote_lookup(string path);
 public:
-	bool visit_file(string path);
+	bool mknod(string path);
+	bool rm(string path);
+
+	bool read(string path, string & out);
+	bool write(string path, string & in);
+
+	bool mkdir(string path);
+	bool rmdir(string path);
+private:
+	bool _lsdir(string path);
+public:
+	bool lsdir(string path, vector<string> & ret);
+	bool lsdir(string path, vector<CInode *> & ret);
+
+	bool exist(string path);
+	bool is_file(string path);
+	bool is_dir(string path);
 };
 
 #endif /* cluster/process/ClientProcess.h */

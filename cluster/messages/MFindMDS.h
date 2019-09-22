@@ -9,6 +9,8 @@ public:
 	MFindMDS(NetworkEntity from, NetworkEntity to) :
 		Message(MSG_FINDMDS, from, to) {}
 	~MFindMDS() {}
+
+	string get_type_name() { return "MFindMDS"; }
 };
 
 #endif /* cluster/messages/MFindMDS.h */

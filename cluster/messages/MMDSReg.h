@@ -9,6 +9,8 @@ public:
 
 	MMDSReg(Port port = -1) : Message(MSG_MDSREG), port(port) {}
 	~MMDSReg() override {}
+
+	string get_type_name() { return "MMDSReg"; }
 };
 
 #endif /* cluster/messages/MMDSReg.h */

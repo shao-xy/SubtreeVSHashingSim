@@ -54,7 +54,7 @@ bool Host::send_message(Process * proc, NetworkEntity * target, Message * m)
 {
 	if (!target || !target->host || target->host < 0)	return false;
 
-	dout << __func__ << " Host " << name() << " send message type " << m->get_type() << " to " << (*target) << dendl;
+	dout << __func__ << " Host " << name() << " send message type " << m->get_type_name() << " to " << (*target) << dendl;
 
 	Port revport = find_or_register_rev(proc);
 
@@ -73,6 +73,6 @@ bool Host::send_message(Process * proc, NetworkEntity * target, Message * m)
 
 bool Host::recv_message(Message * m)
 {
-	dout << __func__ << " Host " << name() << " received message type " << m->get_type() << dendl;
+	dout << __func__ << " Host " << name() << " received message type " << m->get_type_name() << " from " << m->src << dendl;
 	return network.recv_message(m);
 }

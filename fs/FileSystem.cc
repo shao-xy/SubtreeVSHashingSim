@@ -36,6 +36,7 @@ void FileSystem::Inode::delete_myself()
 {
 	parent->delete_sub(this);
 	delete_myself_recur();
+	delete this;
 }
 
 void FileSystem::Inode::delete_myself_recur()
@@ -63,102 +64,64 @@ FileSystem::Inode * FileSystem::lookup(string path, Inode * start)
 	return inode;
 }
 
-bool FileSystem::mknod(string path)
+FileSystem::Inode * FileSystem::mknod(FileSystem::Inode * parent, string name)
 {
-	string parent_path = dirname(path);
-	string name = basename(path);
-	Inode * parent = lookup(parent_path);
-	if (!parent)	return false;
-	parent->add_sub(new Inode(name, false));
+	if (!parent || !::filename_valid(name))	return NULL;
+	Inode * ino = new Inode(name, false);
+	parent->add_sub(ino);
+	return ino;
+}
+
+bool FileSystem::rm(FileSystem::Inode * ino)
+{
+	if (!ino)	return false;
+	ino->delete_myself();
 	return true;
 }
 
-bool FileSystem::rm(string path)
+bool FileSystem::read(FileSystem::Inode * ino, string & out)
 {
-	string parent_path = dirname(path);
-	string name = basename(path);
-	Inode * parent = lookup(parent_path);
-	if (!parent)	return false;
-	parent->delete_sub(name);
+	if (!ino)	return false;
+	out = ino->get_content();
 	return true;
 }
 
-bool FileSystem::read(string path, string & out)
+bool FileSystem::write(FileSystem::Inode * ino, string & in)
 {
-	Inode * inode = lookup(path);
-	if (!inode)	return false;
-
-	out = inode->get_content();
+	if (!ino)	return false;
+	ino->set_content(in);
 	return true;
 }
 
-bool FileSystem::write(string path, string & in)
+FileSystem::Inode * FileSystem::mkdir(FileSystem::Inode * parent, string name)
 {
-	Inode * inode = lookup(path);
-	if (!inode)	return false;
+	if (!parent || !::filename_valid(name))	return NULL;
+	if (parent->get_sub(name))	return NULL;
 
-	inode->set_content(in);
+	Inode * ino = new Inode(name, true);
+	parent->add_sub(ino);
+	return ino;
+}
+
+bool FileSystem::rmdir(FileSystem::Inode * ino)
+{
+	if (!ino)	return false;
+	ino->delete_myself();
 	return true;
 }
 
-bool FileSystem::mkdir(string path)
+bool FileSystem::listdir(FileSystem::Inode * parent, vector<FileSystem::Inode *> & ret)
 {
-	if (path.back() == '/')	path = path.substr(0, path.size() -1);
-	string parent_path = dirname(path);
-	string name = basename(path);
-	Inode * parent = lookup(parent_path);
-	if (!parent)	return false;
-	parent->add_sub(new Inode(name, true));
-	return true;
-}
-
-bool FileSystem::rmdir(string path)
-{
-	Inode * inode = lookup(path);
-	if (!inode)	return false;
-
-	inode->delete_myself();
-	return true;
-}
-
-bool FileSystem::lsdir(string path, vector<string> & ret)
-{
-	Inode * inode = lookup(path);
-	if (!inode || !inode->is_dir())	return false;
-
+	if (!parent || !parent->is_dir())	return false;
 	ret.clear();
-	for (auto it = inode->begin(); it != inode->end(); it++) {
-		ret.push_back((*it)->get_name());
+	for (auto it = parent->begin(); it != parent->end(); it++) {
+		ret.push_back(*it);
 	}
 	return true;
 }
 
-bool FileSystem::lsdir(string path, vector<FileSystem::Inode *> & ret)
+ostream & operator<<(ostream & os, Inode & inode)
 {
-	Inode * inode = lookup(path);
-	if (!inode || !inode->is_dir())	return false;
-
-	ret.clear();
-	for (auto it = inode->begin(); it != inode->end(); it++) {
-		ret.push_back((*it));
-	}
-	return true;
-}
-
-bool FileSystem::exist(string path)
-{
-	Inode * inode = lookup(path);
-	return inode != NULL;
-}
-
-bool FileSystem::is_file(string path)
-{
-	Inode * inode = lookup(path);
-	return inode && !inode->is_dir();
-}
-
-bool FileSystem::is_dir(string path)
-{
-	Inode * inode = lookup(path);
-	return inode && inode->is_dir();
+	os << "[Inode " << &inode << " name = \"" << inode.get_name() << "\", isDir = " << inode.is_dir() << ", content = \"" << inode.get_content() << "\"]";
+	return os;
 }

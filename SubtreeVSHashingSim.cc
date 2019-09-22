@@ -20,10 +20,25 @@ bool TestClientProcess::entry()
 {
 	dout << "Client Process start." << dendl;
 
-	//int ret = visit_file("/a/b");
 	connect_cluster();
 
-	visit_file("/a/b/c");
+	bool ret;
+	ret = mkdir("/a");
+	dout << "Create directory: /a -> " << (ret ? "success" : "failed") << dendl;
+	ret = mkdir("/a/b");
+	dout << "Create directory: /a/b -> " << (ret ? "success" : "failed") << dendl;
+	ret = mknod("/a/b/c");
+	dout << "Create file: /a/b/c -> " << (ret ? "success" : "failed") << dendl;
+	ret = mknod("/d");
+	dout << "Create file /d -> " << (ret ? "success" : "failed") << dendl;
+
+	vector<string> v;
+	lsdir("/", v);
+
+	dout << "List directory: /" << dendl;
+	for (string s : v) {
+		dout << s << dendl;
+	}
 	
 	dout << "Client Process end." << dendl;
 	return true;

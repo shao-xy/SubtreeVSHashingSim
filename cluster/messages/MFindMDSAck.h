@@ -11,6 +11,8 @@ public:
 	MFindMDSAck(NetworkEntity from, NetworkEntity to) :
 		Message(MSG_FINDMDSACK, from, to) {}
 	~MFindMDSAck() {}
+
+	string get_type_name() { return "MFindMDSAck"; }
 };
 
 #endif /* cluster/messages/MFindMDSAck.h */

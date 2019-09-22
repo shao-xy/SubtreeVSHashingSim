@@ -29,6 +29,7 @@ public:
 	virtual ~Message() {}
 
 	int get_type() { return type; }
+	virtual string get_type_name() = 0;
 };
 
 #endif /* cluster/network/Message.h */

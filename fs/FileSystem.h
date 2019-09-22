@@ -1,6 +1,9 @@
 #ifndef __FS_FILESYSTEM_H__
 #define __FS_FILESYSTEM_H__
 
+#include <ostream>
+using std::ostream;
+
 #include "include/types.h"
 
 class FileSystem {
@@ -15,8 +18,9 @@ public:
 		string content;
 
 	public:
-		Inode(string name, bool isDir) : name(name), isDir(isDir) {}
+		Inode(string name, bool isDir) : name(name), isDir(isDir), parent(NULL) {}
 
+		bool is_file() { return !isDir; }
 		bool is_dir() { return isDir; }
 
 		string get_name() { return name; }
@@ -47,21 +51,20 @@ public:
 
 	Inode * lookup(string path, Inode * start = NULL);
 
-	bool mknod(string path);
-	bool rm(string path);
+	Inode * mknod(Inode * parent, string name);
+	bool rm(Inode * ino);
 
-	bool read(string path, string & out);
-	bool write(string path, string & in);
+	bool read(Inode * ino, string & out);
+	bool write(Inode * ino, string & in);
 
-	bool mkdir(string path);
-	bool rmdir(string path);
-	bool lsdir(string path, vector<string> & ret);
-	bool lsdir(string path, vector<Inode *> & ret);
-
-	bool exist(string path);
-	bool is_file(string path);
-	bool is_dir(string path);
+	Inode * mkdir(Inode * parent, string name);
+	bool rmdir(Inode * ino);
+	bool listdir(Inode * parent, vector<Inode *> & ret);
 };
+
+typedef FileSystem::Inode Inode;
+
+ostream & operator<<(ostream & os, Inode & inode);
 
 extern FileSystem gfs;
 
