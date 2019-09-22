@@ -23,6 +23,7 @@ enum class msg_op_fs_t {
 class MClientRequest : public Message {
 public:
 	string path;
+	string fullpath;
 	CInode * inode;
 	msg_op_fs_t op_type;
 	string data;
@@ -35,6 +36,9 @@ public:
 
 	string get_path() { return path; }
 	CInode * get_inode() { return inode; }
+
+	string get_fullpath() { return fullpath; }
+	void set_fullpath(string fullpath) { this->fullpath = fullpath; }
 
 	msg_op_fs_t get_op() { return op_type; }
 	void set_op(msg_op_fs_t op) { op_type = op; }

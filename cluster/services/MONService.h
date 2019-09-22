@@ -19,6 +19,10 @@ public:
 
 	NetworkEntity * get_root_mds();
 
+	map<MDSRank, NetworkEntity *>::iterator mds_begin() { return mds_active_list.begin(); }
+	map<MDSRank, NetworkEntity *>::iterator mds_end() { return mds_active_list.end(); }
+	size_t mds_active_size() { return mds_active_list.size(); }
+
 	bool handle_message(Message * m) override;
 private:
 	bool handle_findmds(Message * m);

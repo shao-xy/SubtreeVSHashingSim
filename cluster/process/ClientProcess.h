@@ -36,8 +36,8 @@ private:
 public:
 	bool connect_cluster();
 private:
-	bool send_request(msg_op_fs_t op, CInode * ino, string data = "");
-	bool send_request(msg_op_fs_t op, string path = "", CInode * ino = NULL, string data = "");
+	bool send_request(string fullpath, msg_op_fs_t op, CInode * ino, string data = "");
+	bool send_request(string fullpath, msg_op_fs_t op, string path = "", CInode * ino = NULL, string data = "");
 private:
 	CInode * _lookup(string path);
 	CInode * lookup(string path);

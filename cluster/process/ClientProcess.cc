@@ -81,12 +81,12 @@ bool ClientProcess::connect_cluster()
 	return connected;
 }
 
-bool ClientProcess::send_request(msg_op_fs_t op, CInode * ino, string data)
+bool ClientProcess::send_request(string fullpath, msg_op_fs_t op, CInode * ino, string data)
 {
-	return send_request(op, string(""), ino, data);
+	return send_request(fullpath, op, string(""), ino, data);
 }
 
-bool ClientProcess::send_request(msg_op_fs_t op, string path, CInode * ino, string data)
+bool ClientProcess::send_request(string fullpath, msg_op_fs_t op, string path, CInode * ino, string data)
 {
 	if (path == "" && !ino)	return false;
 
@@ -98,6 +98,7 @@ bool ClientProcess::send_request(msg_op_fs_t op, string path, CInode * ino, stri
 	else
 		m = new MClientRequest(path, ino);
 
+	m->set_fullpath(fullpath);
 	m->set_op(op);
 
 	if (data != "")
@@ -160,7 +161,7 @@ CInode * ClientProcess::local_lookup(string path)
 
 bool ClientProcess::remote_lookup(string path)
 {
-	return send_request(msg_op_fs_t::LOOKUP, path);
+	return send_request(path, msg_op_fs_t::LOOKUP, path);
 }
 
 bool ClientProcess::mknod(string path)
@@ -169,7 +170,7 @@ bool ClientProcess::mknod(string path)
 	CInode * parent = lookup(dname);
 	if (!parent)	return false;
 
-	return send_request(msg_op_fs_t::CREATE, ::basename(path), parent);
+	return send_request(path, msg_op_fs_t::CREATE, ::basename(path), parent);
 }
 
 bool ClientProcess::rm(string path)
@@ -177,7 +178,7 @@ bool ClientProcess::rm(string path)
 	CInode * ino = lookup(path);
 	if (!ino)	return false;
 
-	return send_request(msg_op_fs_t::RM, ino);
+	return send_request(path, msg_op_fs_t::RM, ino);
 }
 
 bool ClientProcess::read(string path, string & out)
@@ -185,7 +186,7 @@ bool ClientProcess::read(string path, string & out)
 	CInode * ino = lookup(path);
 	if (!ino)	return false;
 
-	return send_request(msg_op_fs_t::READ, ino);
+	return send_request(path, msg_op_fs_t::READ, ino);
 }
 
 bool ClientProcess::write(string path, string & in)
@@ -193,7 +194,7 @@ bool ClientProcess::write(string path, string & in)
 	CInode * ino = lookup(path);
 	if (!ino)	return false;
 
-	return send_request(msg_op_fs_t::WRITE, ino, in);
+	return send_request(path, msg_op_fs_t::WRITE, ino, in);
 }
 
 bool ClientProcess::mkdir(string path)
@@ -201,7 +202,7 @@ bool ClientProcess::mkdir(string path)
 	CInode * ino = lookup(dirname(path));
 	if (!ino)	return false;
 
-	return send_request(msg_op_fs_t::MKDIR, basename(path), ino);
+	return send_request(path, msg_op_fs_t::MKDIR, basename(path), ino);
 }
 
 bool ClientProcess::rmdir(string path)
@@ -209,7 +210,7 @@ bool ClientProcess::rmdir(string path)
 	CInode * ino = lookup(dirname(path));
 	if (!ino)	return false;
 
-	return send_request(msg_op_fs_t::RMDIR, basename(path), ino);
+	return send_request(path, msg_op_fs_t::RMDIR, basename(path), ino);
 }
 
 bool ClientProcess::_lsdir(string path)
@@ -217,7 +218,7 @@ bool ClientProcess::_lsdir(string path)
 	CInode * ino = lookup(dirname(path));
 	if (!ino)	return false;
 
-	return send_request(msg_op_fs_t::LISTDIR, ino);
+	return send_request(path, msg_op_fs_t::LISTDIR, ino);
 }
 
 bool ClientProcess::lsdir(string path, vector<string> & ret)

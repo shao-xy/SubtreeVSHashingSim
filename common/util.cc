@@ -66,6 +66,8 @@ bool filename_valid(string path)
 
 string dirname(string path)
 {
+	if (path.back() == '/') path = path.substr(0, path.length() - 1);
+
 	size_t last_slash_pos = path.rfind('/');
 	if (last_slash_pos == string::npos)	return "";
 	
@@ -75,6 +77,14 @@ string dirname(string path)
 
 string basename(string path)
 {
+	if (path.back() == '/') path = path.substr(0, path.length() - 1);
+	
 	size_t last_slash_pos = path.rfind('/');
 	return last_slash_pos == string::npos ? path : path.substr(last_slash_pos + 1);
+}
+
+size_t hash(string s, size_t divisor)
+{
+	if (!divisor)	return 0;
+	return std::hash<string>()(s) % divisor;
 }
