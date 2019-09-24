@@ -19,7 +19,7 @@
 #include "global/global_disp.h"
 
 #undef dout_prefix
-#define dout_prefix get_host()->name() << "::MDSService(" << get_port() << ") "
+#define dout_prefix get_host()->name() << "::MDSService(rank = " << whoami << ") "
 
 bool MDSService::entry()
 {
