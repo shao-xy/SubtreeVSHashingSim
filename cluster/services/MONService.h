@@ -5,7 +5,7 @@
 
 #include "cluster/Service.h"
 
-#include "MDSService.h"
+#include "mds/mdstypes.h"
 
 class MONService : public Service {
 private:

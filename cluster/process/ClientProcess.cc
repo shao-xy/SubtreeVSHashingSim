@@ -69,12 +69,16 @@ bool ClientProcess::handle_clientrequestreply(Message * m)
 {
 	MClientRequestReply * msg = static_cast<MClientRequestReply *>(m);
 
-	dout << __func__ << " Get request reply of full path " << msg->fullpath << dendl;
+	string fullpath = msg->fullpath;
+	dout << __func__ << " Get request reply of full path " << fullpath << dendl;
+
+	MDSRank fromwho = msg->fromwho;
+	routetable[fullpath] = fromwho;
 
 	if (msg->inode)
-		cache.set(msg->fullpath, msg->inode);
+		cache.set(fullpath, msg->inode);
 	else
-		cache.get(msg->fullpath);
+		cache.get(fullpath);
 
 	callback_inoptr = msg->inode;
 	for (CInode * ino : msg->inode_list) {
@@ -94,6 +98,43 @@ bool ClientProcess::connect_cluster()
 	connected = send_message(&mon, new MFindMDS());
 
 	return connected;
+}
+
+MDSRank ClientProcess::findroute(string & fullpath)
+{
+	MDSRank ret = -1;
+
+	if (fullpath == "")	return ret;
+
+	if (fullpath[0] != '/')
+		fullpath = "/" + fullpath;
+
+	while (fullpath.back() == '/' && fullpath.length() > 1)	fullpath = fullpath.substr(0, fullpath.length() - 1);
+
+	dout << __func__ << " Checking local route for path: " << fullpath << dendl;
+
+	// Fullpath
+	if (routetable.count(fullpath) > 0) {
+		ret = routetable[fullpath];
+		dout << __func__ << " Request with full path: " << fullpath << " should be posted to rank " << ret << dendl;
+		return ret;
+	}
+
+	// Longest prefix matching
+	vector<unsigned int> slashes = ::findAll(fullpath, "/");
+	for (auto it = slashes.rbegin(); it != slashes.rend() - 1; it++) {
+		string subpath = fullpath.substr(0, *it);
+		if (routetable.count(subpath) > 0) {
+			ret = routetable[subpath];
+			dout << __func__ << " Request with full path: " << fullpath << " should be posted to rank " << ret << dendl;
+			return ret;
+		}
+	}
+	if (routetable.count("/") > 0) {
+		ret = routetable["/"];
+	}
+	dout << __func__ << " Request with full path: " << fullpath << " should be posted to rank " << ret << dendl;
+	return ret;
 }
 
 bool ClientProcess::send_request(string fullpath, msg_op_fs_t op, CInode * ino, string data)
@@ -123,8 +164,8 @@ bool ClientProcess::send_request(string fullpath, msg_op_fs_t op, string path, C
 	callback_inoptr = NULL;
 	callback_inolist.clear();
 
-	// TODO: Send to which MDS?
-	return send_message(&root_mds, m);
+	MDSRank target = findroute(fullpath);
+	return target != -1 ? send_message(mdsmap[target], m) : send_message(&root_mds, m);
 }
 
 CInode * ClientProcess::_lookup(string path)

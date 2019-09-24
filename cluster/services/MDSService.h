@@ -4,8 +4,7 @@
 #include <include/types.h>
 
 #include "cluster/Service.h"
-
-typedef int MDSRank;
+#include "mds/mdstypes.h"
 
 class CInode;
 class MClientRequest;

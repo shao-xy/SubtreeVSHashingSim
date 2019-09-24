@@ -2,7 +2,7 @@
 #define __CLUSTER_MESSAGES_MFINDMDSAck_H__
 
 #include "cluster/network/Message.h"
-#include "cluster/services/MDSService.h"
+#include "cluster/services/mds/mdstypes.h"
 
 class NetworkEntity;
 

@@ -3,8 +3,9 @@
 
 #include "include/types.h"
 
-#include "cluster/services/MDSService.h"
+#include "cluster/services/mds/mdstypes.h"
 
+class Host;
 class MONService;
 
 class MetadataDispatcher {

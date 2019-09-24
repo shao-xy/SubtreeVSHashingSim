@@ -8,6 +8,8 @@ using std::string;
 
 #include "fs/CachedObject.h"
 
+#include "cluster/services/mds/mdstypes.h"
+
 class MClientRequestReply : public Message {
 public:
 	string path;
@@ -16,9 +18,11 @@ public:
 	string fullpath;
 	vector<CInode *> inode_list;
 
-	MClientRequestReply(string fullpath = "") : Message(MSG_CLIENTREQREPLY), inode(NULL), fullpath(fullpath) {}
-	MClientRequestReply(string fullpath, CInode * inode) : Message(MSG_CLIENTREQREPLY), inode(inode), fullpath(fullpath) {}
-	MClientRequestReply(string fullpath, string path, CInode * inode) : Message(MSG_CLIENTREQREPLY), path(path), inode(inode), fullpath(fullpath) {}
+	MDSRank fromwho;
+
+	MClientRequestReply(MDSRank src = -1, string fullpath = "") : Message(MSG_CLIENTREQREPLY), inode(NULL), fullpath(fullpath), fromwho(src) {}
+	MClientRequestReply(MDSRank src, string fullpath, CInode * inode) : Message(MSG_CLIENTREQREPLY), inode(inode), fullpath(fullpath), fromwho(src) {}
+	MClientRequestReply(MDSRank src, string fullpath, string path, CInode * inode) : Message(MSG_CLIENTREQREPLY), path(path), inode(inode), fullpath(fullpath), fromwho(src) {}
 	~MClientRequestReply() {
 		for (CInode * ino : inode_list) {
 			delete ino;

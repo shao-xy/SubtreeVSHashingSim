@@ -3,8 +3,6 @@
 
 #include "cluster/network/Message.h"
 
-#include "cluster/services/MDSService.h"
-
 class MMDSMapUpdateAck : public Message {
 public:
 	MMDSMapUpdateAck() : Message(MSG_MDSMAPUPDATEACK) {}

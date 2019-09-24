@@ -3,7 +3,7 @@
 
 #include "cluster/network/Message.h"
 
-#include "cluster/services/MDSService.h"
+#include "cluster/services/mds/mdstypes.h"
 
 class MMDSRegAck : public Message {
 public:

@@ -150,7 +150,7 @@ bool MDSService::handle_op_create(MClientRequest * m)
 	Inode * ino = gfs.mknod(m->get_inode()->get(), m->get_path());
 	if (!ino)	return false;
 	CInode * inode = new CInode(ino);
-	return send_message(&m->src, new MClientRequestReply(m->get_fullpath(), inode));
+	return send_message(&m->src, new MClientRequestReply(whoami, m->get_fullpath(), inode));
 }
 
 bool MDSService::handle_op_lookup(MClientRequest * m)
@@ -164,12 +164,12 @@ bool MDSService::handle_op_lookup(MClientRequest * m)
 		return false;
 	}
 
-	return send_message(&m->src, new MClientRequestReply(m->get_fullpath(), new CInode(inode)));
+	return send_message(&m->src, new MClientRequestReply(whoami, m->get_fullpath(), new CInode(inode)));
 }
 
 bool MDSService::handle_op_read(MClientRequest * m)
 {
-	MClientRequestReply * rmsg = new MClientRequestReply(m->get_fullpath());
+	MClientRequestReply * rmsg = new MClientRequestReply(whoami, m->get_fullpath());
 	if (!gfs.read(m->get_inode()->get(), rmsg->data))	return false;
 	return send_message(&m->src, rmsg);
 }
@@ -177,26 +177,26 @@ bool MDSService::handle_op_read(MClientRequest * m)
 bool MDSService::handle_op_write(MClientRequest * m)
 {
 	if (!gfs.write(m->get_inode()->get(), m->get_data()))	return false;
-	return send_message(&m->src, new MClientRequestReply(m->get_fullpath()));
+	return send_message(&m->src, new MClientRequestReply(whoami, m->get_fullpath()));
 }
 
 bool MDSService::handle_op_rm(MClientRequest * m)
 {
 	if (!gfs.rm(m->get_inode()->get()))	return false;
-	return send_message(&m->src, new MClientRequestReply(m->get_fullpath()));
+	return send_message(&m->src, new MClientRequestReply(whoami, m->get_fullpath()));
 }
 
 bool MDSService::handle_op_mkdir(MClientRequest * m)
 {
 	Inode * ino = gfs.mkdir(m->get_inode()->get(), m->get_path());
 	if (!ino)	return false;
-	return send_message(&m->src, new MClientRequestReply(m->get_fullpath(), new CInode(ino)));
+	return send_message(&m->src, new MClientRequestReply(whoami, m->get_fullpath(), new CInode(ino)));
 }
 
 bool MDSService::handle_op_rmdir(MClientRequest * m)
 {
 	if (!gfs.rmdir(m->get_inode()->get()))	return false;
-	return send_message(&m->src, new MClientRequestReply(m->get_fullpath()));
+	return send_message(&m->src, new MClientRequestReply(whoami, m->get_fullpath()));
 }
 
 bool MDSService::handle_op_listdir(MClientRequest * m)
@@ -204,7 +204,7 @@ bool MDSService::handle_op_listdir(MClientRequest * m)
 	vector<Inode *> v;
 	if (!gfs.listdir(m->get_inode()->get(), v))	return false;
 
-	MClientRequestReply * rmsg = new MClientRequestReply(m->get_fullpath());
+	MClientRequestReply * rmsg = new MClientRequestReply(whoami, m->get_fullpath());
 	for (Inode * ino : v)
 		rmsg->inode_list.push_back(new CInode(ino));
 

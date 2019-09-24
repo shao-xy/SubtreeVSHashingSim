@@ -10,7 +10,7 @@
 
 #include "cluster/network/NetworkEntity.h"
 
-#include "cluster/services/MDSService.h"
+#include "cluster/services/mds/mdstypes.h"
 
 #define CLIENT_LRU_SIZE 1000
 
@@ -27,6 +27,8 @@ private:
 	string callback_data;
 
 	map<MDSRank, NetworkEntity *> mdsmap;
+	map<string, MDSRank> routetable;
+
 	LRUCache<string, CInode *> cache;
 public:
 	ClientProcess(Host * h) : Process(h), connected(false), cache(CLIENT_LRU_SIZE) {}
@@ -42,6 +44,7 @@ private:
 public:
 	bool connect_cluster();
 private:
+	MDSRank findroute(string & fullpath);
 	bool send_request(string fullpath, msg_op_fs_t op, CInode * ino, string data = "");
 	bool send_request(string fullpath, msg_op_fs_t op, string path = "", CInode * ino = NULL, string data = "");
 private:
