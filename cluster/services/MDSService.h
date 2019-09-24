@@ -9,10 +9,12 @@ typedef int MDSRank;
 
 class CInode;
 class MClientRequest;
+class NetworkEntity;
 
 class MDSService : public Service {
 private:
 	MDSRank whoami;
+	map<MDSRank, NetworkEntity *> mds_map;
 	unordered_map<string, CInode *> cache;
 public:
 	MDSService(Host * host = NULL) : Service(host) {}
@@ -24,7 +26,9 @@ public:
 	bool handle_message(Message * m) override;
 private:
 	bool handle_mdsregack(Message * m);
+	bool handle_mdsmapupdate(Message * m);
 	bool handle_clientrequest(Message * m);
+	bool handle_clientrequestforward(Message * m);
 
 	bool handle_op_lookup(MClientRequest * m);
 	bool handle_op_create(MClientRequest * m);

@@ -7,6 +7,9 @@ class CInode {
 	Inode * ino;
 public:
 	CInode(Inode * ino = NULL) : ino(ino) {}
+	CInode(CInode * inode = NULL) {
+		ino = inode ? inode->ino : NULL;
+	}
 	Inode * get() { return ino; }
 
 	string get_name() { return ino->get_name(); }

@@ -10,6 +10,8 @@
 
 #include "cluster/network/NetworkEntity.h"
 
+#include "cluster/services/MDSService.h"
+
 #define CLIENT_LRU_SIZE 1000
 
 class CInode;
@@ -22,12 +24,16 @@ private:
 
 	CInode * callback_inoptr;
 	vector<CInode *> callback_inolist;
+	string callback_data;
 
+	map<MDSRank, NetworkEntity *> mdsmap;
 	LRUCache<string, CInode *> cache;
 public:
 	ClientProcess(Host * h) : Process(h), connected(false), cache(CLIENT_LRU_SIZE) {}
 	ClientProcess(Host * h, Host * mon_host, Port mon_p) : Process(h), mon(mon_host, mon_p), connected(false), cache(CLIENT_LRU_SIZE) {}
 	~ClientProcess() {}
+
+	bool set_root_mds();
 
 	virtual bool handle_message(Message * m) override;
 private:
@@ -48,7 +54,7 @@ public:
 	bool rm(string path);
 
 	bool read(string path, string & out);
-	bool write(string path, string & in);
+	bool write(string path, string in);
 
 	bool mkdir(string path);
 	bool rmdir(string path);

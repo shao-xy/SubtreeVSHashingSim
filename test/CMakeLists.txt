@@ -3,3 +3,6 @@ target_link_libraries(test_file_system common fs)
 
 add_executable(test_hashing hashing.cc)
 target_link_libraries(test_hashing common)
+
+add_executable(test_lru testlru.cc)
+target_link_libraries(test_lru common)

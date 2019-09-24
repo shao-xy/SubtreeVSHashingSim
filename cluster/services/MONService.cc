@@ -10,6 +10,8 @@
 #include "cluster/messages/MFindMDSAck.h"
 #include "cluster/messages/MMDSReg.h"
 #include "cluster/messages/MMDSRegAck.h"
+#include "cluster/messages/MMDSMapUpdate.h"
+#include "cluster/messages/MMDSMapUpdateAck.h"
 
 #undef dout_prefix
 #define dout_prefix get_host()->name() << "::MONService "
@@ -40,15 +42,6 @@ MDSRank MONService::add_mds(NetworkEntity * new_mds)
 	return rank;
 }
 
-NetworkEntity * MONService::get_root_mds()
-{
-	if (mds_active_list.count(0) != 0)
-		return mds_active_list[0];
-
-	// no root mds, find one
-	return mds_active_list.size() == 0 ? NULL : mds_active_list.begin()->second;
-}
-
 bool MONService::handle_message(Message * m)
 {
 	if (!m)	return false;
@@ -64,6 +57,9 @@ bool MONService::handle_message(Message * m)
 		case MSG_MDSREG:
 			ret = handle_mdsregister(m);
 			break;
+		case MSG_MDSMAPUPDATEACK:
+			ret = true; // it's OK now
+			break;
 		default: break;
 	};
 	
@@ -74,9 +70,7 @@ bool MONService::handle_message(Message * m)
 bool MONService::handle_findmds(Message * m)
 {
 	dout << __func__ << " Get find mds request from " << m->src << dendl;
-	MFindMDSAck * mack = new MFindMDSAck();
-	mack->root_mds = get_root_mds();
-	return send_message(&m->src, mack);
+	return send_message(&m->src, new MFindMDSAck(mds_active_list));
 }
 
 bool MONService::handle_mdsregister(Message * m)
@@ -88,5 +82,16 @@ bool MONService::handle_mdsregister(Message * m)
 	if (rank < 0)	return false;
 
 	MMDSRegAck * mack = new MMDSRegAck(rank);
-	return send_message(&m->src, mack);
+	if (!send_message(&m->src, mack))	return false;
+
+	for (auto it = mds_active_list.begin(); it != mds_active_list.end(); it++) {
+		MMDSMapUpdate * m = new MMDSMapUpdate(mds_active_list);
+		if (!send_message(it->second, m)) {
+			// TODO: If failure happens, actually we need to rollback this operation
+			// Assume failure never happens here
+			return false;
+		}
+	}
+
+	return true;
 }

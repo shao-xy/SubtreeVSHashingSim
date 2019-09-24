@@ -8,6 +8,10 @@
 #include "cluster/Cluster.h"
 #include "cluster/process/ClientProcess.h"
 
+#include "cluster/services/MONService.h"
+
+#include "global/global_disp.h"
+
 class TestClientProcess : public ClientProcess {
 public:
 	TestClientProcess(Host * h, Host * mon_host, Port mon_p) : ClientProcess(h, mon_host, mon_p) {}
@@ -33,12 +37,18 @@ bool TestClientProcess::entry()
 	dout << "Create file /d -> " << (ret ? "success" : "failed") << dendl;
 
 	vector<string> v;
-	lsdir("/", v);
+	lsdir("/a/b", v);
 
-	dout << "List directory: /" << dendl;
+	dout << "List directory: /a/b" << dendl;
 	for (string s : v) {
 		dout << s << dendl;
 	}
+
+	write("/d", "Test text.");
+	string s;
+	read("/d", s);
+
+	dout << "Text in /d: " << s << dendl;
 	
 	dout << "Client Process end." << dendl;
 	return true;
@@ -68,6 +78,9 @@ int main(int argc, char ** argv)
 			s->start();
 		}
 	}
+
+	dout << __func__ << " Creating dispatchers ..." << dendl;
+	global_create_dispatchers(static_cast<MONService *>(mon_service));
 
 	Host * client_host = c.add_host("client");
 	Process * client_proc = new TestClientProcess(client_host, mon_host, mon_port);

@@ -2,14 +2,16 @@
 #define __CLUSTER_MESSAGES_MFINDMDSAck_H__
 
 #include "cluster/network/Message.h"
+#include "cluster/services/MDSService.h"
+
+class NetworkEntity;
 
 class MFindMDSAck : public Message {
 public:
-	NetworkEntity root_mds;
+	map<MDSRank, NetworkEntity *> mds_active_list;
 
 	MFindMDSAck() : Message(MSG_FINDMDSACK) {}
-	MFindMDSAck(NetworkEntity from, NetworkEntity to) :
-		Message(MSG_FINDMDSACK, from, to) {}
+	MFindMDSAck(map<MDSRank, NetworkEntity *> mds_active_list) : Message(MSG_FINDMDSACK), mds_active_list(mds_active_list) {}
 	~MFindMDSAck() {}
 
 	string get_type_name() { return "MFindMDSAck"; }

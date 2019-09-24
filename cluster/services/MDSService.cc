@@ -7,11 +7,16 @@
 
 #include "cluster/messages/MMDSReg.h"
 #include "cluster/messages/MMDSRegAck.h"
+#include "cluster/messages/MMDSMapUpdate.h"
+#include "cluster/messages/MMDSMapUpdateAck.h"
 #include "cluster/messages/MClientRequest.h"
 #include "cluster/messages/MClientRequestReply.h"
+#include "cluster/messages/MClientRequestForward.h"
 
 #include "fs/CachedObject.h"
 #include "fs/FileSystem.h"
+
+#include "global/global_disp.h"
 
 #undef dout_prefix
 #define dout_prefix get_host()->name() << "::MDSService(" << get_port() << ") "
@@ -45,9 +50,17 @@ bool MDSService::handle_message(Message * m)
 		case MSG_MDSREGACK:
 			ret = handle_mdsregack(m);
 			break;
+		case MSG_MDSMAPUPDATE:
+			ret = handle_mdsmapupdate(m);
+			break;
 		// client
 		case MSG_CLIENTREQ:
 			ret = handle_clientrequest(m);
+			break;
+		// mds
+		case MSG_CLIENTREQFORWARD:
+			ret = handle_clientrequestforward(m);
+			break;
 		default:
 			break;
 	}
@@ -64,13 +77,32 @@ bool MDSService::handle_mdsregack(Message * m)
 	return true;
 }
 
+bool MDSService::handle_mdsmapupdate(Message * m)
+{
+	MMDSMapUpdate * msg = static_cast<MMDSMapUpdate *>(m);
+	mds_map = msg->mds_active_list;
+	dout << __func__ << " Update MDS map success. Total active: " << mds_map.size() << dendl;
+	return send_message(&m->src, new MMDSMapUpdateAck);
+}
+
 bool MDSService::handle_clientrequest(Message * m)
 {
-	bool ret = false;
-
 	MClientRequest * msg = static_cast<MClientRequest *>(m);
+	string fullpath = msg->get_fullpath();
+	// Check if my work
+	MDSRank targetrank = global_get_dispatcher_from_conf()->dispatch(fullpath);
+	if (targetrank == -1) {
+		dout << __func__ << " Dispatcher cannot determine which MDS should handle this request. I will do this" << dendl;
+	}
+	else if (targetrank != whoami) {
+		dout << __func__ << " Message should be handled by rank " << targetrank << ", forwarding ... " << dendl;
+		return send_message(mds_map[targetrank], new MClientRequestForward(m));
+	}
+
 	msg_op_fs_t op = msg->get_op();
 	string path = msg->get_path();
+
+	bool ret = false;
 
 	//dout << __func__ << " Get client request op: " << op << " (path = " << path << ")" << dendl;
 	dout << __func__ << " Get client request op: " << static_cast<typename std::underlying_type<msg_op_fs_t>::type>(op) << " (path = \"" << path << "\")" << dendl;
@@ -107,12 +139,18 @@ bool MDSService::handle_clientrequest(Message * m)
 	return ret;
 }
 
+bool MDSService::handle_clientrequestforward(Message * m)
+{
+	MClientRequestForward * wrapper_msg = static_cast<MClientRequestForward *>(m);
+	return handle_clientrequest(wrapper_msg->inner_m);
+}
+
 bool MDSService::handle_op_create(MClientRequest * m)
 {
 	Inode * ino = gfs.mknod(m->get_inode()->get(), m->get_path());
 	if (!ino)	return false;
 	CInode * inode = new CInode(ino);
-	return send_message(&m->src, new MClientRequestReply(inode));
+	return send_message(&m->src, new MClientRequestReply(m->get_fullpath(), inode));
 }
 
 bool MDSService::handle_op_lookup(MClientRequest * m)
@@ -126,12 +164,12 @@ bool MDSService::handle_op_lookup(MClientRequest * m)
 		return false;
 	}
 
-	return send_message(&m->src, new MClientRequestReply(new CInode(inode)));
+	return send_message(&m->src, new MClientRequestReply(m->get_fullpath(), new CInode(inode)));
 }
 
 bool MDSService::handle_op_read(MClientRequest * m)
 {
-	MClientRequestReply * rmsg = new MClientRequestReply();
+	MClientRequestReply * rmsg = new MClientRequestReply(m->get_fullpath());
 	if (!gfs.read(m->get_inode()->get(), rmsg->data))	return false;
 	return send_message(&m->src, rmsg);
 }
@@ -139,26 +177,26 @@ bool MDSService::handle_op_read(MClientRequest * m)
 bool MDSService::handle_op_write(MClientRequest * m)
 {
 	if (!gfs.write(m->get_inode()->get(), m->get_data()))	return false;
-	return send_message(&m->src, new MClientRequestReply);
+	return send_message(&m->src, new MClientRequestReply(m->get_fullpath()));
 }
 
 bool MDSService::handle_op_rm(MClientRequest * m)
 {
 	if (!gfs.rm(m->get_inode()->get()))	return false;
-	return send_message(&m->src, new MClientRequestReply);
+	return send_message(&m->src, new MClientRequestReply(m->get_fullpath()));
 }
 
 bool MDSService::handle_op_mkdir(MClientRequest * m)
 {
 	Inode * ino = gfs.mkdir(m->get_inode()->get(), m->get_path());
 	if (!ino)	return false;
-	return send_message(&m->src, new MClientRequestReply(new CInode(ino)));
+	return send_message(&m->src, new MClientRequestReply(m->get_fullpath(), new CInode(ino)));
 }
 
 bool MDSService::handle_op_rmdir(MClientRequest * m)
 {
 	if (!gfs.rmdir(m->get_inode()->get()))	return false;
-	return send_message(&m->src, new MClientRequestReply);
+	return send_message(&m->src, new MClientRequestReply(m->get_fullpath()));
 }
 
 bool MDSService::handle_op_listdir(MClientRequest * m)
@@ -166,7 +204,7 @@ bool MDSService::handle_op_listdir(MClientRequest * m)
 	vector<Inode *> v;
 	if (!gfs.listdir(m->get_inode()->get(), v))	return false;
 
-	MClientRequestReply * rmsg = new MClientRequestReply;
+	MClientRequestReply * rmsg = new MClientRequestReply(m->get_fullpath());
 	for (Inode * ino : v)
 		rmsg->inode_list.push_back(new CInode(ino));
 

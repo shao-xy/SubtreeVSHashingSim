@@ -66,10 +66,10 @@ bool filename_valid(string path)
 
 string dirname(string path)
 {
-	if (path.back() == '/') path = path.substr(0, path.length() - 1);
+	while (path.back() == '/') path = path.substr(0, path.length() - 1);
 
 	size_t last_slash_pos = path.rfind('/');
-	if (last_slash_pos == string::npos)	return "";
+	if (last_slash_pos == string::npos)	return "/";
 	
 	string dirpath = path.substr(0, last_slash_pos);
 	return dirpath == "" ? "/" : dirpath;

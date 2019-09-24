@@ -13,14 +13,13 @@ protected:
 	MetadataDispatcher(MONService * mon) : mon(mon) {}
 
 	map<Host *, vector<MDSRank> *> lut;
+	void build_lut();
 	void clear_lut();
 
 	int which_child(string path);
 public:
 	static MetadataDispatcher * create(string strategy, MONService * mon);
 	~MetadataDispatcher() { clear_lut(); }
-
-	void build_lut();
 
 	virtual MDSRank dispatch(string path) = 0;
 };

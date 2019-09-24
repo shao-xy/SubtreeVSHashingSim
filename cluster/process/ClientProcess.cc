@@ -14,6 +14,24 @@
 #undef dout_prefix
 #define dout_prefix get_host()->name() << ' '
 
+bool ClientProcess::set_root_mds()
+{
+	NetworkEntity * entity = 0;
+	if (mdsmap.count(0) != 0)
+		entity = mdsmap[0];
+	else {
+		// no root mds, find one
+		entity = mdsmap.size() == 0 ? NULL : mdsmap.begin()->second;
+	}
+
+	if (!entity)	return false;
+
+	root_mds.host = entity->host;
+	root_mds.port = entity->port;
+
+	return true;
+}
+
 bool ClientProcess::handle_message(Message * m)
 {
 	if (!m)	return false;
@@ -38,8 +56,9 @@ bool ClientProcess::handle_findmdsack(Message * m)
 {
 	MFindMDSAck * msg = static_cast<MFindMDSAck *>(m);
 
-	root_mds.host = msg->root_mds.host;
-	root_mds.port = msg->root_mds.port;
+	mdsmap = msg->mds_active_list;
+
+	if (!set_root_mds())	return false;
 
 	//dout << __func__ << " Get known: root MDS at " << root_mds.host->name() << " port " << root_mds.port << dendl;
 	dout << __func__ << " Get known: root MDS at " << root_mds << dendl;
@@ -50,22 +69,18 @@ bool ClientProcess::handle_clientrequestreply(Message * m)
 {
 	MClientRequestReply * msg = static_cast<MClientRequestReply *>(m);
 
-	//if (!msg->inode)	return false;
+	dout << __func__ << " Get request reply of full path " << msg->fullpath << dendl;
 
-	/*
-	if (msg->inode && msg->inode->get()) {
-		dout << __func__ << " Get request reply: path = \"" << msg->path << "\", inode = " << *(msg->inode->get()) << dendl;
-	}
+	if (msg->inode)
+		cache.set(msg->fullpath, msg->inode);
 	else
-		dout << __func__ << " Get request reply: path = \"" << msg->path << "\"" << dendl;
-	*/
-
-	//cache.set(msg->path, msg->inode);
+		cache.get(msg->fullpath);
 
 	callback_inoptr = msg->inode;
 	for (CInode * ino : msg->inode_list) {
-		callback_inolist.push_back(ino);
+		callback_inolist.push_back(new CInode(ino));
 	}
+	callback_data = msg->data;
 
 	return true;
 }
@@ -186,10 +201,13 @@ bool ClientProcess::read(string path, string & out)
 	CInode * ino = lookup(path);
 	if (!ino)	return false;
 
-	return send_request(path, msg_op_fs_t::READ, ino);
+	if (!send_request(path, msg_op_fs_t::READ, ino))	return false;
+
+	out = callback_data;
+	return true;
 }
 
-bool ClientProcess::write(string path, string & in)
+bool ClientProcess::write(string path, string in)
 {
 	CInode * ino = lookup(path);
 	if (!ino)	return false;
@@ -215,7 +233,7 @@ bool ClientProcess::rmdir(string path)
 
 bool ClientProcess::_lsdir(string path)
 {
-	CInode * ino = lookup(dirname(path));
+	CInode * ino = lookup(path);
 	if (!ino)	return false;
 
 	return send_request(path, msg_op_fs_t::LISTDIR, ino);

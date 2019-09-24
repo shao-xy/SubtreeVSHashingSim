@@ -62,7 +62,7 @@ SubtreeMetadataDispatcher::SubtreeMetadataDispatcher(MONService * mon) : Metadat
 
 HashingMetadataDispatcher::HashingMetadataDispatcher(MONService * mon) : MetadataDispatcher(mon) {}
 
-HybridMetadataDispatcher::HybridMetadataDispatcher(MONService * mon) : MetadataDispatcher(mon) {}
+HybridMetadataDispatcher::HybridMetadataDispatcher(MONService * mon) : MetadataDispatcher(mon) { build_lut(); }
 
 MDSRank SubtreeMetadataDispatcher::dispatch(string path)
 {

@@ -5,15 +5,20 @@
 
 #define MSG_NULL 0
 
-// Monitor
+// Monitor <-> MDS
 #define MSG_FINDMDS 100
 #define MSG_FINDMDSACK 101
 #define MSG_MDSREG 102
 #define MSG_MDSREGACK 103
+#define MSG_MDSMAPUPDATE 104
+#define MSG_MDSMAPUPDATEACK 105
 
-// MDS
+// Client <-> MDS
 #define MSG_CLIENTREQ 200
 #define MSG_CLIENTREQREPLY 201
+
+// MDS <-> MDS
+#define MSG_CLIENTREQFORWARD 301
 
 class Message {
 private:
