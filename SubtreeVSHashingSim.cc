@@ -20,43 +20,29 @@ protected:
 	bool entry() override;
 };
 
+bool TestClientProcess::handle_message(Message * m)
+{
+	return ClientProcess::handle_message(m);
+}
+
 bool TestClientProcess::entry()
 {
 	dout << "Client Process start." << dendl;
 
 	connect_cluster();
 
-	bool ret;
-	ret = mkdir("/a");
-	dout << "Create directory: /a -> " << (ret ? "success" : "failed") << dendl;
-	ret = mkdir("/a/b");
-	dout << "Create directory: /a/b -> " << (ret ? "success" : "failed") << dendl;
-	ret = mknod("/a/b/c");
-	dout << "Create file: /a/b/c -> " << (ret ? "success" : "failed") << dendl;
-	ret = mknod("/d");
-	dout << "Create file /d -> " << (ret ? "success" : "failed") << dendl;
-
-	vector<string> v;
-	lsdir("/a/b", v);
-
-	dout << "List directory: /a/b" << dendl;
-	for (string s : v) {
-		dout << s << dendl;
+	for (int i = 0; i < 10; i++) {
+		string dirpath = "/" + std::to_string(i);
+		cout << "Creating directory " << dirpath << dendl;
+		mkdir(dirpath);
+		for (int j = 0; j < 10000; j++) {
+			string filepath = dirpath + "/" + std::to_string(j);
+			cout << "Creating file " << filepath << dendl;
+			mknod(filepath);
+		}
 	}
 
-	write("/d", "Test text.");
-	string s;
-	read("/d", s);
-
-	dout << "Text in /d: " << s << dendl;
-	
-	dout << "Client Process end." << dendl;
 	return true;
-}
-
-bool TestClientProcess::handle_message(Message * m)
-{
-	return ClientProcess::handle_message(m);
 }
 
 int main(int argc, char ** argv)
@@ -89,3 +75,40 @@ int main(int argc, char ** argv)
 
 	return 0;
 }
+
+/*
+ *
+bool TestClientProcess_test1_entry()
+{
+	dout << "Client Process start." << dendl;
+
+	connect_cluster();
+
+	bool ret;
+	ret = mkdir("/a");
+	dout << "Create directory: /a -> " << (ret ? "success" : "failed") << dendl;
+	ret = mkdir("/a/b");
+	dout << "Create directory: /a/b -> " << (ret ? "success" : "failed") << dendl;
+	ret = mknod("/a/b/c");
+	dout << "Create file: /a/b/c -> " << (ret ? "success" : "failed") << dendl;
+	ret = mknod("/d");
+	dout << "Create file /d -> " << (ret ? "success" : "failed") << dendl;
+
+	vector<string> v;
+	lsdir("/a/b", v);
+
+	dout << "List directory: /a/b" << dendl;
+	for (string s : v) {
+		dout << s << dendl;
+	}
+
+	write("/d", "Test text.");
+	string s;
+	read("/d", s);
+
+	dout << "Text in /d: " << s << dendl;
+	
+	dout << "Client Process end." << dendl;
+	return true;
+}
+*/

@@ -24,6 +24,7 @@ add_subdirectory(cluster)
 add_subdirectory(fs)
 add_subdirectory(global)
 add_subdirectory(test)
+add_subdirectory(time)
 
 add_executable(SubtreeVSHashingSim
 	SubtreeVSHashingSim.cc

@@ -6,3 +6,9 @@ target_link_libraries(test_hashing common)
 
 add_executable(test_lru testlru.cc)
 target_link_libraries(test_lru common)
+
+add_executable(test_time time.cc)
+target_link_libraries(test_time common time)
+
+add_executable(test_exlog exlog.cc)
+target_link_libraries(test_exlog common)

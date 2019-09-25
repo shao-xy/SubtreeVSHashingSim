@@ -30,7 +30,7 @@ bool NetworkEntity::operator==(NetworkEntity & another)
 	return host == another.host && port == another.port;
 }
 
-ostream & operator<<(ostream & os, NetworkEntity & entity)
+ostream & operator<<(ostream & os, NetworkEntity entity)
 {
 	if (!entity.host)
 		os << "[NetworkEntity host (null) port=" << entity.port << "]";

@@ -23,6 +23,6 @@ public:
 	bool operator==(NetworkEntity & another);
 };
 
-ostream & operator<<(ostream & os, NetworkEntity & entity);
+std::ostream & operator<<(std::ostream & os, NetworkEntity entity);
 
 #endif /* cluster/network/NetworkEntity.h */
