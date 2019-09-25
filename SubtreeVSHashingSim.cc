@@ -1,3 +1,4 @@
+#include <iostream>
 #include <string>
 
 #include "common/Debug.h"
@@ -11,6 +12,8 @@
 #include "cluster/services/MONService.h"
 
 #include "global/global_disp.h"
+
+#include "time/Time.h"
 
 class TestClientProcess : public ClientProcess {
 public:
@@ -29,18 +32,27 @@ bool TestClientProcess::entry()
 {
 	dout << "Client Process start." << dendl;
 
+	// simulate: mount
 	connect_cluster();
 
+	// simulate: create files
+	gsw.reset_zero();
 	for (int i = 0; i < 10; i++) {
 		string dirpath = "/" + std::to_string(i);
 		cout << "Creating directory " << dirpath << dendl;
 		mkdir(dirpath);
 		for (int j = 0; j < 10000; j++) {
 			string filepath = dirpath + "/" + std::to_string(j);
-			cout << "Creating file " << filepath << dendl;
+			cout << "Creating file " << filepath << '\r';
+			//cout_flush;
 			mknod(filepath);
 		}
+		cout << dendl;
 	}
+	cout << "\nDone." << dendl;
+	cout << "Stopwatch shows: " << gsw.get() << dendl;
+
+	// simulate: visit
 
 	return true;
 }

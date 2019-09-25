@@ -170,8 +170,8 @@ bool ClientProcess::send_request(string fullpath, msg_op_fs_t op, string path, C
 
 CInode * ClientProcess::_lookup(string path)
 {
-	CInode * ino = local_lookup(path);
-	if (ino)	return ino;
+	//CInode * ino = local_lookup(path);
+	//if (ino)	return ino;
 
 	remote_lookup(path);
 	return callback_inoptr;

@@ -8,4 +8,4 @@ add_library(cluster STATIC
 	Process.cc
 	Service.cc
 )
-target_link_libraries(cluster process services common)
+target_link_libraries(cluster process services common time)

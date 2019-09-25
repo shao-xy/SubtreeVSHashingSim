@@ -2,6 +2,7 @@
 #include "Cluster.h"
 
 #include "common/Debug.h"
+#include "time/Time.h"
 
 #undef dout_prefix
 #define dout_prefix "Host." << name() << ' '
@@ -64,6 +65,7 @@ bool Host::send_message(Process * proc, NetworkEntity * target, Message * m)
 	m->dst.host = target->host;
 	m->dst.port = target->port;
 
+	gsw.tick_random(20, 25);
 	bool ret = target->host->recv_message(m);
 
 	unregister_procrev(revport);
