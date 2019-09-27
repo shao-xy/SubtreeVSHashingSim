@@ -12,3 +12,6 @@ target_link_libraries(test_time common time)
 
 add_executable(test_exlog exlog.cc)
 target_link_libraries(test_exlog common)
+
+add_executable(test_random random.cc)
+target_link_libraries(test_random common)

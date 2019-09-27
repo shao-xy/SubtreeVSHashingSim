@@ -18,7 +18,7 @@ public:
 		string content;
 
 	public:
-		Inode(string name, bool isDir) : name(name), isDir(isDir), parent(NULL) {}
+		Inode(string name, bool isDir, Inode * parent = NULL) : name(name), isDir(isDir), parent(parent) {}
 
 		bool is_file() { return !isDir; }
 		bool is_dir() { return isDir; }

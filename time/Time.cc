@@ -18,3 +18,19 @@ void WindingTime::tick_random(RandomRange r)
 {
 	tick(_rg(r));
 }
+
+void WindingTime::tick_random(string type, size_t repeat_time)
+{
+	for (size_t i = 0; i < repeat_time; i++) {
+		if (type == "tcp")
+			tick_random(25, 35);
+		else if (type == "memory")
+			tick_random(0, 1);
+		else if (type == "ipc")
+			tick_random(6, 8);
+		else if (type == "IPoIB")
+			tick_random(15, 20);
+		else
+			throw "Time: Not supported type of communication delay";
+	}
+}

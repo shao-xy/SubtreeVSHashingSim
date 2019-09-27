@@ -1,5 +1,5 @@
-#ifndef __CLUSTER_MESSAGES_MCLIENTREQUEST_H__
-#define __CLUSTER_MESSAGES_MCLIENTREQUEST_H__
+#ifndef __CLUSTER_MESSAGES_MMDSSLAVEREQUEST_H__
+#define __CLUSTER_MESSAGES_MMDSSLAVEREQUEST_H__
 
 #include <string>
 using std::string;
@@ -10,7 +10,7 @@ using std::string;
 
 #include "fs/CachedObject.h"
 
-class MClientRequest : public Message {
+class MMDSSlaveRequest : public Message {
 public:
 	string path;
 	string fullpath;
@@ -18,11 +18,11 @@ public:
 	msg_op_fs_t op_type;
 	string data;
 
-	MClientRequest() : Message(MSG_CLIENTREQ) {}
-	MClientRequest(string path) : Message(MSG_CLIENTREQ), path(path) {}
-	MClientRequest(CInode * ino) : Message(MSG_CLIENTREQ), inode(ino) {}
-	MClientRequest(string path, CInode * ino) : Message(MSG_CLIENTREQ), path(path), inode(ino) {}
-	~MClientRequest() {}
+	MMDSSlaveRequest() : Message(MSG_MDSSLAVEREQ) {}
+	MMDSSlaveRequest(string path) : Message(MSG_MDSSLAVEREQ), path(path) {}
+	MMDSSlaveRequest(CInode * ino) : Message(MSG_MDSSLAVEREQ), inode(ino) {}
+	MMDSSlaveRequest(string path, CInode * ino) : Message(MSG_MDSSLAVEREQ), path(path), inode(ino) {}
+	~MMDSSlaveRequest() {}
 
 	string get_path() { return path; }
 	CInode * get_inode() { return inode; }
@@ -36,7 +36,7 @@ public:
 	string & get_data() { return data; }
 	void set_data(string newdata) { data = newdata; }
 
-	string get_type_name() { return "MClientRequest"; }
+	string get_type_name() { return "MMDSSlaveRequest"; }
 };
 
-#endif /* cluster/messages/MClientRequest.h */
+#endif /* cluster/messages/MMDSSlaveRequest.h */

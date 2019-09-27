@@ -1,6 +1,9 @@
 #ifndef __TIME_ETERNALTIME_H__
 #define __TIME_ETERNALTIME_H__
 
+#include <string>
+using std::string;
+
 #include "include/Random.h"
 
 typedef unsigned int Time;
@@ -15,6 +18,7 @@ public:
 	virtual void tick(Time some_time);
 	void tick_random(Time lower_bound = 0, Time upper_bound = 0);
 	void tick_random(RandomRange r);
+	void tick_random(string type, size_t repeat_time = 1);
 };
 
 class EternalTime : public WindingTime {

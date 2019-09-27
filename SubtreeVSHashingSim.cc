@@ -12,8 +12,18 @@
 #include "cluster/services/MONService.h"
 
 #include "global/global_disp.h"
+#include "global/global_conf.h"
 
 #include "time/Time.h"
+
+#define HOST_SIZE 1
+#define MDS_SIZE_PER_HOST 2
+
+#define DIR_SIZE 10
+#define FILE_SIZE_PER_DIR 100
+#define FILE_SIZE (DIR_SIZE * FILE_SIZE_PER_DIR)
+
+#define METADATA_STRATEGY "subtree"
 
 class TestClientProcess : public ClientProcess {
 public:
@@ -36,12 +46,15 @@ bool TestClientProcess::entry()
 	connect_cluster();
 
 	// simulate: create files
-	gsw.reset_zero();
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < DIR_SIZE; i++) {
 		string dirpath = "/" + std::to_string(i);
 		cout << "Creating directory " << dirpath << dendl;
 		mkdir(dirpath);
-		for (int j = 0; j < 10000; j++) {
+	}
+	gsw.reset_zero();
+	for (int i = 0; i < DIR_SIZE; i++) {
+		string dirpath = "/" + std::to_string(i);
+		for (int j = 0; j < FILE_SIZE_PER_DIR; j++) {
 			string filepath = dirpath + "/" + std::to_string(j);
 			cout << "Creating file " << filepath << '\r';
 			//cout_flush;
@@ -51,14 +64,64 @@ bool TestClientProcess::entry()
 	}
 	cout << "\nDone." << dendl;
 	cout << "Stopwatch shows: " << gsw.get() << dendl;
+	cout << "Average time: " << ((double) gsw.get()) / FILE_SIZE << " us." << dendl;
 
-	// simulate: visit
+	// simulate: stat (check if file)
+	gsw.reset_zero();
+	for (int i = 0; i < DIR_SIZE; i++) {
+		string dirpath = "/" + std::to_string(i);
+		for (int j = 0; j < FILE_SIZE_PER_DIR; j++) {
+			string filepath = dirpath + "/" + std::to_string(j);
+			cout << "Stating file " << filepath << '\r';
+			is_file(filepath);
+		}
+		cout << dendl;
+	}
+	cout << "\nDone." << dendl;
+	cout << "Stopwatch shows: " << gsw.get() << dendl;
+	cout << "Average time: " << ((double) gsw.get()) / FILE_SIZE << " us." << dendl;
+
+	// simulate: mkdir
+	//gsw.reset_zero();
+	//for (int i = DIR_SIZE; i < (DIR_SIZE + FILE_SIZE_PER_DIR); i++) {
+	//	string dirpath = "/" + std::to_string(i);
+	//	cout << "Creating directory " << dirpath << '\r' << dendl;
+	//	mkdir(dirpath);
+	//}
+	//cout << "\nDone." << dendl;
+	//cout << "Stopwatch shows: " << gsw.get() << dendl;
+	//cout << "Average time: " << ((double) gsw.get()) / FILE_SIZE << " us." << dendl;
+
+	// simulate: lsdir
+	gsw.reset_zero();
+	for (int i = 0; i < DIR_SIZE; i++) {
+		string dirpath = "/" + std::to_string(i);
+		cout << "Listing directory " << dirpath << dendl;
+		vector<string> v;
+		lsdir(dirpath, v);
+	}
+	cout << "\nDone." << dendl;
+	cout << "Stopwatch shows: " << gsw.get() << dendl;
+	cout << "Average time: " << ((double) gsw.get()) / DIR_SIZE << " us." << dendl;
+
+	// simulate: rmdir
+	gsw.reset_zero();
+	for (int i = 0; i < DIR_SIZE; i++) {
+		string dirpath = "/" + std::to_string(i);
+		cout << "Removing directory " << dirpath << dendl;
+		rmdir(dirpath);
+	}
+	cout << "\nDone." << dendl;
+	cout << "Stopwatch shows: " << gsw.get() << dendl;
+	cout << "Average time: " << ((double) gsw.get()) / DIR_SIZE << " us." << dendl;
 
 	return true;
 }
 
 int main(int argc, char ** argv)
 {
+	g_conf.set("mds_md_dist_strategy", METADATA_STRATEGY);
+
 	Cluster c;
 	
 	// add Monitor
@@ -69,9 +132,9 @@ int main(int argc, char ** argv)
 
 	dout << __func__ << " Registered monitor on " << mon_host->name() << " port " << mon_port << dendl;
 
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 1; i++) {
 		Host * mds_host = c.add_host("mdshost." + std::to_string(i));
-		for (int j = 0; j < 3; j++) {
+		for (int j = 0; j < 2; j++) {
 			Service * s = Service::create(mds_host, "mds");
 			s->start();
 		}

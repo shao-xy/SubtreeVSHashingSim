@@ -266,10 +266,10 @@ bool ClientProcess::mkdir(string path)
 
 bool ClientProcess::rmdir(string path)
 {
-	CInode * ino = lookup(dirname(path));
-	if (!ino)	return false;
+	CInode * ino = lookup(path);
+	if (!ino || !ino->is_dir())	return false;
 
-	return send_request(path, msg_op_fs_t::RMDIR, basename(path), ino);
+	return send_request(path, msg_op_fs_t::RMDIR, ino);
 }
 
 bool ClientProcess::_lsdir(string path)

@@ -20,22 +20,29 @@ vector<FileSystem::Inode *>::iterator FileSystem::Inode::get_subitr(string subpa
 
 void FileSystem::Inode::delete_sub(FileSystem::Inode * inode)
 {
-	for (vector<Inode *>::iterator it = entries.begin(); it != entries.end(); it++) {
-		if (*it == inode)	entries.erase(it);
+	for (vector<Inode *>::iterator it = entries.begin(); it != entries.end(); ) {
+		if (*it == inode)
+			it = entries.erase(it);
+		else
+			it++;
 	}
 }
 
 void FileSystem::Inode::delete_sub(string name)
 {
-	for (vector<Inode *>::iterator it = entries.begin(); it != entries.end(); it++) {
-		if ((*it)->name == name)	entries.erase(it);
+	for (vector<Inode *>::iterator it = entries.begin(); it != entries.end(); ) {
+		if ((*it)->name == name)
+			it = entries.erase(it);
+		else
+			it++;
 	}
 }
 
 void FileSystem::Inode::delete_myself()
 {
-	parent->delete_sub(this);
+	if (!parent)	return;
 	delete_myself_recur();
+	parent->delete_sub(this);
 	delete this;
 }
 
@@ -67,7 +74,7 @@ FileSystem::Inode * FileSystem::lookup(string path, Inode * start)
 FileSystem::Inode * FileSystem::mknod(FileSystem::Inode * parent, string name)
 {
 	if (!parent || !::filename_valid(name))	return NULL;
-	Inode * ino = new Inode(name, false);
+	Inode * ino = new Inode(name, false, parent);
 	parent->add_sub(ino);
 	return ino;
 }
@@ -98,7 +105,7 @@ FileSystem::Inode * FileSystem::mkdir(FileSystem::Inode * parent, string name)
 	if (!parent || !::filename_valid(name))	return NULL;
 	if (parent->get_sub(name))	return NULL;
 
-	Inode * ino = new Inode(name, true);
+	Inode * ino = new Inode(name, true, parent);
 	parent->add_sub(ino);
 	return ino;
 }
