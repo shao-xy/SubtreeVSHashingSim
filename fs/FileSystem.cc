@@ -71,6 +71,12 @@ FileSystem::Inode * FileSystem::lookup(string path, Inode * start)
 	return inode;
 }
 
+bool FileSystem::is_dir(string path)
+{
+	Inode * inode = lookup(path);
+	return inode && inode->is_dir();
+}
+
 FileSystem::Inode * FileSystem::mknod(FileSystem::Inode * parent, string name)
 {
 	if (!parent || !::filename_valid(name))	return NULL;

@@ -50,6 +50,7 @@ public:
 	FileSystem() : root(new Inode("/", true)) {}
 
 	Inode * lookup(string path, Inode * start = NULL);
+	bool is_dir(string path);
 
 	Inode * mknod(Inode * parent, string name);
 	bool rm(Inode * ino);

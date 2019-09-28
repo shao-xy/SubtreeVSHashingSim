@@ -67,6 +67,8 @@ HybridMetadataDispatcher::HybridMetadataDispatcher(MONService * mon) : MetadataD
 MDSRank SubtreeMetadataDispatcher::dispatch(string path)
 {
 	if (!mon || path == "")	return -1;
+
+	if (!gfs.is_dir(path))	return dispatch(::dirname(path));
 	
 	vector<string> v = split_path(path);
 	MDSRank retrank = -1;

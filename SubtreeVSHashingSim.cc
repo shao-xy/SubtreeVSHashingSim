@@ -16,14 +16,14 @@
 
 #include "time/Time.h"
 
-#define HOST_SIZE 1
-#define MDS_SIZE_PER_HOST 2
+#define HOST_SIZE "5"
+#define MDS_SIZE_PER_HOST "1"
 
 #define DIR_SIZE 10
-#define FILE_SIZE_PER_DIR 100
+#define FILE_SIZE_PER_DIR 10000
 #define FILE_SIZE (DIR_SIZE * FILE_SIZE_PER_DIR)
 
-#define METADATA_STRATEGY "subtree"
+#define METADATA_STRATEGY "hashing"
 
 class TestClientProcess : public ClientProcess {
 public:

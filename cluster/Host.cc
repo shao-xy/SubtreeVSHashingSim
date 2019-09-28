@@ -7,6 +7,9 @@
 #undef dout_prefix
 #define dout_prefix "Host." << name() << ' '
 
+#define NETWORK_LAT_SAME_HOST "tcp"
+#define NETWORK_LAT_OTHER_HOST "tcp"
+
 Host::~Host()
 {
 	for (Process * proc : process_list) {
@@ -65,7 +68,10 @@ bool Host::send_message(Process * proc, NetworkEntity * target, Message * m)
 	m->dst.host = target->host;
 	m->dst.port = target->port;
 
-	gsw.tick_random("tcp");
+	if (this == target->host)
+		gsw.tick_random(NETWORK_LAT_SAME_HOST);
+	else
+		gsw.tick_random(NETWORK_LAT_OTHER_HOST);
 
 	bool ret = target->host->recv_message(m);
 

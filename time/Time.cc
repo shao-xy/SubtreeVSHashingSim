@@ -25,7 +25,7 @@ void WindingTime::tick_random(string type, size_t repeat_time)
 		if (type == "tcp")
 			tick_random(25, 35);
 		else if (type == "memory")
-			tick_random(0, 1);
+			tick_random(Time(0, 50), Time(0,150));
 		else if (type == "ipc")
 			tick_random(6, 8);
 		else if (type == "IPoIB")
