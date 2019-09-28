@@ -16,8 +16,8 @@ function mds_conf_run()
 	local mdsperhost=$2
 
 	# Modify configuration in source file
-	sed -i "s/^\(\#define HOST_SIZE\s*\).*$/\1\"$hostnum\"/" SubtreeVSHashingSim.cc
-	sed -i "s/^\(\#define MDS_SIZE_PER_HOST\s*\).*$/\1\"$mdsperhost\"/" SubtreeVSHashingSim.cc
+	sed -i "s/^\(\#define HOST_SIZE\s*\).*$/\1$hostnum/" SubtreeVSHashingSim.cc
+	sed -i "s/^\(\#define MDS_SIZE_PER_HOST\s*\).*$/\1$mdsperhost/" SubtreeVSHashingSim.cc
 
 	# Build
 	make -C build/
@@ -25,6 +25,9 @@ function mds_conf_run()
 	# Run
 	single_round_data=$(./build/SubtreeVSHashingSim | grep "Average" | awk '{print $6}')
 	output_data "$hostnum*$mdsperhost,$single_round_data"
+
+	# Clear log each time
+	> Simulator.log
 }
 
 function single_mddist_strategy()
@@ -92,6 +95,9 @@ function main()
 
 # Clear log
 > Simulator.log
+
+# Clear output
+> ${OUTPUT_FILE}
 
 # Start
 main

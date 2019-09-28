@@ -9,6 +9,9 @@
 
 #include "fs/CachedObject.h"
 
+#include "global/global_conf.h"
+#include "global/global_disp.h"
+
 #include "ClientProcess.h"
 
 #undef dout_prefix
@@ -114,6 +117,10 @@ MDSRank ClientProcess::findroute(string & fullpath)
 	while (fullpath.back() == '/' && fullpath.length() > 1)	fullpath = fullpath.substr(0, fullpath.length() - 1);
 
 	dout << __func__ << " Checking local route for path: " << fullpath << dendl;
+
+	// return hashed target if hashing method is taken
+	if (g_conf.get("mds_md_dist_strategy") == "hashing")
+		return hashingDisp->dispatch(fullpath);
 
 	// Fullpath
 	if (routetable.count(fullpath) > 0) {

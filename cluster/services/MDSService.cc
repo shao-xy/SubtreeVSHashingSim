@@ -265,6 +265,8 @@ bool MDSService::handle_op_rmdir(MClientRequest * m)
 		}
 	}
 
+	cout << __func__ << " Other targeted mds size=" << other_targeted_mds.size() << dendl;
+
 	for (MDSRank rank : other_targeted_mds) {
 		MMDSSlaveRequest * paral_m = new MMDSSlaveRequest(m->get_inode());
 		paral_m->set_fullpath(m->get_fullpath());
@@ -299,6 +301,8 @@ bool MDSService::handle_op_listdir(MClientRequest * m)
 	}
 
 	gsw.tick_random("memory", count);
+
+	cout << __func__ << " Other targeted mds size=" << other_targeted_mds.size() << dendl;
 
 	for (MDSRank rank : other_targeted_mds) {
 		MMDSSlaveRequest * paral_m = new MMDSSlaveRequest(m->get_inode());
@@ -339,7 +343,6 @@ bool MDSService::handle_slave_op_listdir(MMDSSlaveRequest * m)
 
 	MMDSSlaveRequestReply * rmsg = new MMDSSlaveRequestReply(whoami, m->get_fullpath());
 	size_t count = 0;
-	vector<MDSRank> other_targeted_mds;
 	for (Inode * ino : v) {
 		string fullpath = m->get_fullpath() + "/" + ino->get_name();
 		MDSRank targetrank = global_get_dispatcher_from_conf()->dispatch(fullpath);

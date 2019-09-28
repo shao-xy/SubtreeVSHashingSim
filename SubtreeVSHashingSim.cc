@@ -16,14 +16,14 @@
 
 #include "time/Time.h"
 
-#define HOST_SIZE "5"
-#define MDS_SIZE_PER_HOST "1"
+#define HOST_SIZE 5
+#define MDS_SIZE_PER_HOST 1
 
 #define DIR_SIZE 10
 #define FILE_SIZE_PER_DIR 10000
 #define FILE_SIZE (DIR_SIZE * FILE_SIZE_PER_DIR)
 
-#define METADATA_STRATEGY "hashing"
+#define METADATA_STRATEGY "subtree"
 
 class TestClientProcess : public ClientProcess {
 public:
@@ -56,7 +56,9 @@ bool TestClientProcess::entry()
 		string dirpath = "/" + std::to_string(i);
 		for (int j = 0; j < FILE_SIZE_PER_DIR; j++) {
 			string filepath = dirpath + "/" + std::to_string(j);
-			cout << "Creating file " << filepath << '\r';
+			//cout << "Creating file " << filepath << '\r';
+			cout << "Creating file " << filepath << dendl;
+			dout << "Creating file " << filepath << dendl;
 			//cout_flush;
 			mknod(filepath);
 		}
@@ -132,9 +134,9 @@ int main(int argc, char ** argv)
 
 	dout << __func__ << " Registered monitor on " << mon_host->name() << " port " << mon_port << dendl;
 
-	for (int i = 0; i < 1; i++) {
+	for (int i = 0; i < HOST_SIZE; i++) {
 		Host * mds_host = c.add_host("mdshost." + std::to_string(i));
-		for (int j = 0; j < 2; j++) {
+		for (int j = 0; j < MDS_SIZE_PER_HOST; j++) {
 			Service * s = Service::create(mds_host, "mds");
 			s->start();
 		}

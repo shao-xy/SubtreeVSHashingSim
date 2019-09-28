@@ -4,6 +4,9 @@
 #include <string>
 using std::string;
 
+#include <iostream>
+using std::ostream;
+
 #include "include/Random.h"
 
 typedef unsigned int TimeVal;
@@ -33,6 +36,8 @@ inline Time & operator+=(Time & l, const Time & r)
 	l.ns = l.ns % 1000;
 	return l;
 }
+
+ostream & operator<<(ostream & os, Time t);
 
 class WindingTime {
 protected:
