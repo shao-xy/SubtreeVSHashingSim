@@ -62,6 +62,7 @@ function single_clientcache_strategy()
 		sed -i "s/^\(\#define ENABLE_CLIENT_CACHE\s*\).*$/\10/" cluster/process/ClientProcess.cc
 	else
 		sed -i "s/^\(\#define ENABLE_CLIENT_CACHE\s*\).*$/\11/" cluster/process/ClientProcess.cc
+		sed -i "s/^\(\#define CLIENT_LRU_SIZE\s*\).*$/\1$cachesize/" cluster/process/ClientProcess.h
 	fi
 	
 	single_round
@@ -70,21 +71,19 @@ function single_clientcache_strategy()
 function single_network_strategy()
 {
 	single_clientcache_strategy 0
+	single_clientcache_strategy 500
 	single_clientcache_strategy 1000
+	single_clientcache_strategy 1500
+	single_clientcache_strategy 2000
+	single_clientcache_strategy 2500
 }
 
 function main()
 {
-	# Set all TCP/IP
-	output_data "=======Network:TCP/IP======="
+	# Set TCP/IP + IPC
+	output_data "=======Network:TCP/IP+IPC======="
 	sed -i "s/^\(\#define NETWORK_LAT_SAME_HOST\s*\).*$/\1\"tcp\"/" cluster/Host.cc
-	sed -i "s/^\(\#define NETWORK_LAT_OTHER_HOST\s*\).*$/\1\"tcp\"/" cluster/Host.cc
-	single_network_strategy
-
-	# Set all IPoIB
-	output_data "=======Network:IPoIB======="
-	sed -i "s/^\(\#define NETWORK_LAT_SAME_HOST\s*\).*$/\1\"IPoIB\"/" cluster/Host.cc
-	sed -i "s/^\(\#define NETWORK_LAT_OTHER_HOST\s*\).*$/\1\"IPoIB\"/" cluster/Host.cc
+	sed -i "s/^\(\#define NETWORK_LAT_OTHER_HOST\s*\).*$/\1\"ipc\"/" cluster/Host.cc
 	single_network_strategy
 
 	# Set IB + IPC
