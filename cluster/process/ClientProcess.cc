@@ -119,8 +119,11 @@ MDSRank ClientProcess::findroute(string & fullpath)
 	dout << __func__ << " Checking local route for path: " << fullpath << dendl;
 
 	// return hashed target if hashing method is taken
-	if (g_conf.get("mds_md_dist_strategy") == "hashing")
+	string dist_strategy = g_conf.get("mds_md_dist_strategy");
+	if (dist_strategy == "hashing")
 		return hashingDisp->dispatch(fullpath);
+	else if (dist_strategy == "hybrid")
+		return hybridDisp->dispatch(fullpath);
 
 	// Fullpath
 	if (routetable.count(fullpath) > 0) {

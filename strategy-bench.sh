@@ -39,10 +39,10 @@ function single_mddist_strategy()
 	# Modify strategy in source file
 	sed -i "s/^\(\#define METADATA_STRATEGY\s*\).*$/\1\"$strategy\"/" SubtreeVSHashingSim.cc
 
-	mds_conf_run 5 1
-	mds_conf_run 5 2
-	mds_conf_run 5 3
-	mds_conf_run 5 4
+	mds_conf_run 1 5
+	mds_conf_run 2 5
+	mds_conf_run 3 5
+	mds_conf_run 4 5
 	mds_conf_run 5 5
 }
 
