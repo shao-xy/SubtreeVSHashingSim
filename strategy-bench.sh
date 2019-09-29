@@ -76,20 +76,20 @@ function single_network_strategy()
 function main()
 {
 	# Set all TCP/IP
-	output_data "=======Network:TCP/IP======="
-	sed -i "s/^\(\#define NETWORK_LAT_SAME_HOST\s*\).*$/\1\"tcp\"/" cluster/Host.cc
-	sed -i "s/^\(\#define NETWORK_LAT_OTHER_HOST\s*\).*$/\1\"tcp\"/" cluster/Host.cc
-	single_network_strategy
+	#output_data "=======Network:TCP/IP======="
+	#sed -i "s/^\(\#define NETWORK_LAT_SAME_HOST\s*\).*$/\1\"tcp\"/" cluster/Host.cc
+	#sed -i "s/^\(\#define NETWORK_LAT_OTHER_HOST\s*\).*$/\1\"tcp\"/" cluster/Host.cc
+	#single_network_strategy
 
 	# Set all IPoIB
-	output_data "=======Network:IPoIB======="
-	sed -i "s/^\(\#define NETWORK_LAT_SAME_HOST\s*\).*$/\1\"IPoIB\"/" Host.cc
-	sed -i "s/^\(\#define NETWORK_LAT_OTHER_HOST\s*\).*$/\1\"IPoIB\"/" Host.cc
+	#output_data "=======Network:IPoIB======="
+	sed -i "s/^\(\#define NETWORK_LAT_SAME_HOST\s*\).*$/\1\"IPoIB\"/" cluster/Host.cc
+	sed -i "s/^\(\#define NETWORK_LAT_OTHER_HOST\s*\).*$/\1\"IPoIB\"/" cluster/Host.cc
 	single_network_strategy
 
 	# Set IB + IPC
 	output_data "=======Network:IPoIB+IPC======="
-	sed -i "s/^\(\#define NETWORK_LAT_OTHER_HOST\s*\).*$/\1\"ipc\"/" Host.cc
+	sed -i "s/^\(\#define NETWORK_LAT_OTHER_HOST\s*\).*$/\1\"ipc\"/" cluster/Host.cc
 	single_network_strategy
 }
 
