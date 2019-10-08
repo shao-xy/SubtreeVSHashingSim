@@ -12,7 +12,7 @@
 
 #include "cluster/services/mds/mdstypes.h"
 
-#define CLIENT_LRU_SIZE 1000
+#include "Control.h"
 
 class CInode;
 

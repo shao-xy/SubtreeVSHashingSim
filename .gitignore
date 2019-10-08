@@ -4,3 +4,4 @@ build/*
 *.log
 
 output.csv
+cache-lat.csv

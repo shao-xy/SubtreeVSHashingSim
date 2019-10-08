@@ -14,16 +14,11 @@
 #include "global/global_disp.h"
 #include "global/global_conf.h"
 
+#include "include/Random.h"
+
 #include "time/Time.h"
 
-#define HOST_SIZE 5
-#define MDS_SIZE_PER_HOST 1
-
-#define DIR_SIZE 10
-#define FILE_SIZE_PER_DIR 10000
-#define FILE_SIZE (DIR_SIZE * FILE_SIZE_PER_DIR)
-
-#define METADATA_STRATEGY "subtree"
+#include "Control.h"
 
 class TestClientProcess : public ClientProcess {
 public:
@@ -56,32 +51,32 @@ bool TestClientProcess::entry()
 		string dirpath = "/" + std::to_string(i);
 		for (int j = 0; j < FILE_SIZE_PER_DIR; j++) {
 			string filepath = dirpath + "/" + std::to_string(j);
-			//cout << "Creating file " << filepath << '\r';
-			cout << "Creating file " << filepath << dendl;
-			dout << "Creating file " << filepath << dendl;
+			cout << "Creating file " << filepath << '\r';
+			//cout << "Creating file " << filepath << dendl;
+			//dout << "Creating file " << filepath << dendl;
 			//cout_flush;
 			mknod(filepath);
 		}
 		cout << dendl;
 	}
 	cout << "\nDone." << dendl;
-	cout << "Stopwatch shows: " << gsw.get() << dendl;
-	cout << "Average time: " << ((double) gsw.get()) / FILE_SIZE << " us." << dendl;
+	//cout << "Stopwatch shows: " << gsw.get() << dendl;
+	//cout << "Average time: " << ((double) gsw.get()) / FILE_SIZE << " us." << dendl;
 
 	// simulate: stat (check if file)
-	gsw.reset_zero();
-	for (int i = 0; i < DIR_SIZE; i++) {
-		string dirpath = "/" + std::to_string(i);
-		for (int j = 0; j < FILE_SIZE_PER_DIR; j++) {
-			string filepath = dirpath + "/" + std::to_string(j);
-			cout << "Stating file " << filepath << '\r';
-			is_file(filepath);
-		}
-		cout << dendl;
-	}
-	cout << "\nDone." << dendl;
-	cout << "Stopwatch shows: " << gsw.get() << dendl;
-	cout << "Average time: " << ((double) gsw.get()) / FILE_SIZE << " us." << dendl;
+	//gsw.reset_zero();
+	//for (int i = 0; i < DIR_SIZE; i++) {
+	//	string dirpath = "/" + std::to_string(i);
+	//	for (int j = 0; j < FILE_SIZE_PER_DIR; j++) {
+	//		string filepath = dirpath + "/" + std::to_string(j);
+	//		cout << "Stating file " << filepath << '\r';
+	//		is_file(filepath);
+	//	}
+	//	cout << dendl;
+	//}
+	//cout << "\nDone." << dendl;
+	//cout << "Stopwatch shows: " << gsw.get() << dendl;
+	//cout << "Average time: " << ((double) gsw.get()) / FILE_SIZE << " us." << dendl;
 
 	// simulate: mkdir
 	//gsw.reset_zero();
@@ -94,10 +89,24 @@ bool TestClientProcess::entry()
 	//cout << "Stopwatch shows: " << gsw.get() << dendl;
 	//cout << "Average time: " << ((double) gsw.get()) / FILE_SIZE << " us." << dendl;
 
-	// simulate: lsdir
+	// simulate: lsdir -- method 1: traverse
+	//gsw.reset_zero();
+	//for (int i = 0; i < DIR_SIZE; i++) {
+	//	string dirpath = "/" + std::to_string(i);
+	//	cout << "Listing directory " << dirpath << dendl;
+	//	vector<string> v;
+	//	lsdir(dirpath, v);
+	//}
+	//cout << "\nDone." << dendl;
+	//cout << "Stopwatch shows: " << gsw.get() << dendl;
+	//cout << "Average time: " << ((double) gsw.get()) / DIR_SIZE << " us." << dendl;
+
+	// simulate: lsdir -- method 2: random workload, amount = size * 3
+	RandomRange dirrange(0, DIR_SIZE);
+	RandomGenerator gen;
 	gsw.reset_zero();
-	for (int i = 0; i < DIR_SIZE; i++) {
-		string dirpath = "/" + std::to_string(i);
+	for (int i = 0; i < 3 * DIR_SIZE; i++) {
+		string dirpath = "/" + std::to_string(gen(dirrange));
 		cout << "Listing directory " << dirpath << dendl;
 		vector<string> v;
 		lsdir(dirpath, v);

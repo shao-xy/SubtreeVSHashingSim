@@ -17,8 +17,6 @@
 #undef dout_prefix
 #define dout_prefix get_host()->name() << ' '
 
-#define ENABLE_CLIENT_CACHE 0
-
 bool ClientProcess::set_root_mds()
 {
 	NetworkEntity * entity = 0;

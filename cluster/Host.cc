@@ -4,11 +4,10 @@
 #include "common/Debug.h"
 #include "time/Time.h"
 
+#include "Control.h"
+
 #undef dout_prefix
 #define dout_prefix "Host." << name() << ' '
-
-#define NETWORK_LAT_SAME_HOST "tcp"
-#define NETWORK_LAT_OTHER_HOST "tcp"
 
 Host::~Host()
 {
